@@ -37,6 +37,15 @@ public class Genome implements Cloneable {
 			}
 		}
 	}
+	
+	@Override
+	public String toString() {
+		String result = "Genome: ";
+		for(Gene gene : genes) {
+			result += gene.getValue() + ", ";
+		}
+		return result;
+	}
 
 	@Override
 	public Object clone() throws CloneNotSupportedException {

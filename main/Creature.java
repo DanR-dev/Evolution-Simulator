@@ -13,7 +13,7 @@ public abstract class Creature {
 	protected int size;
 	protected float energy;
 
-	public abstract Creature reproduce();
+	public abstract Creature[] reproduce();
 	public abstract void chooseBehaviour();
 	
 	public Creature(int mutationRate, float reproduceBehaviour, float growBehaviour, int size) {
