@@ -1,7 +1,5 @@
 package main;
 
-import java.util.ArrayList;
-
 /*
  * "size" = volume
  */
@@ -10,7 +8,7 @@ public abstract class Creature {
 	protected static final int MAX_MUTATION = 10;
 	protected static final float ENERGY_PER_SIZE = 100;
 	
-	protected final ArrayList<Gene> genome;
+	protected final Genome genome;
 	
 	protected int size;
 	protected float energy;
@@ -19,20 +17,23 @@ public abstract class Creature {
 	public abstract void chooseBehaviour();
 	
 	public Creature(int mutationRate, float reproduceBehaviour, float growBehaviour, int size) {
-		genome = new ArrayList<Gene>();
-		genome.add(GeneType.MUTATION_RATE.ordinal(), new Gene(1, MAX_MUTATION, 1, mutationRate));
-		genome.add(GeneType.REPRODUCE_BEHAVIOUR.ordinal(), new Gene(0, 1, 0.1F, mutationRate));
-		genome.add(GeneType.GROW_BEHAVIOUR.ordinal(), new Gene(0, 1, 0.1F, mutationRate));
+		genome = new Genome();
+		genome.addGene(GeneType.MUTATION_RATE, new Gene(1, MAX_MUTATION, 1, mutationRate));
+		genome.addGene(GeneType.REPRODUCE_BEHAVIOUR, new Gene(0, 1, 0.1F, reproduceBehaviour));
+		genome.addGene(GeneType.GROW_BEHAVIOUR, new Gene(0, 1, 0.1F, growBehaviour));
 		
 		this.size = size;
 		this.energy = size * ENERGY_PER_SIZE;
 	}
 	
-	public Creature(ArrayList<Gene> genome, int size) {
-		this.genome = (ArrayList<Gene>) genome.clone();
-		
-		this.size = size;
-		this.energy = size * ENERGY_PER_SIZE;
+	public Creature(Genome genome, int size) {
+		try {
+			this.genome = (Genome) genome.clone();
+			this.size = size;
+			this.energy = size * ENERGY_PER_SIZE;
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException("creature cloning error");
+		}
 	}
 	
 	public void die() {

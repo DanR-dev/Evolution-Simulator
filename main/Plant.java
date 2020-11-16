@@ -1,12 +1,11 @@
 package main;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 public class Plant extends Creature {
 	protected static final int MAX_SIZE = 100;
 	protected static final int MAX_SEED_RANGE = 10;
-	protected static final float SUSTAIN_EFFICIENCY = 1;
+	protected static final int SUSTAIN_EFFICIENCY = 1;
 
 	public static Plant randomPlant() {
 		Random rng = new Random();
@@ -15,21 +14,21 @@ public class Plant extends Creature {
 	}
 
 	public static void main(String[] args) {
-		int test = 1;
 		Plant parent = randomPlant();
 		Plant child = parent.reproduce();
+		Plant grandChild = child.reproduce();
 	}
 
 	public Plant(int mutationRate, float reproduceBehaviour, float growBehaviour, int sizeCap, int startingSize,
 			int seedRange) { // grows with genome
 		super(mutationRate, reproduceBehaviour, growBehaviour, startingSize);
-		genome.add(GeneType.SIZE_CAP.ordinal(), new Gene(1, MAX_SIZE, 1, sizeCap));
-		genome.add(GeneType.STARTING_SIZE.ordinal(), new Gene(1, MAX_SIZE, 1, startingSize));
-		genome.add(GeneType.SEED_RANGE.ordinal(), new Gene(1, MAX_SEED_RANGE, 1, seedRange));
+		genome.addGene(GeneType.SIZE_CAP, new Gene(1, MAX_SIZE, 1, sizeCap));
+		genome.addGene(GeneType.STARTING_SIZE, new Gene(1, MAX_SIZE, 1, startingSize));
+		genome.addGene(GeneType.SEED_RANGE, new Gene(1, MAX_SEED_RANGE, 1, seedRange));
 	}
 
-	public Plant(ArrayList<Gene> parentGenome) {
-		super(parentGenome, (int) parentGenome.get(GeneType.STARTING_SIZE.ordinal()).getValue());
+	public Plant(Genome parentGenome) {
+		super(parentGenome, (int) parentGenome.getGeneValue(GeneType.STARTING_SIZE));
 	}
 
 	public void chooseBehaviour() {
@@ -38,13 +37,12 @@ public class Plant extends Creature {
 			die();
 		}
 
-		if (size < genome.get(GeneType.SIZE_CAP.ordinal()).getValue()
-				&& genome.get(GeneType.GROW_BEHAVIOUR.ordinal()).getValue() > energy / (size * ENERGY_PER_SIZE)) {
+		if (size < genome.getGeneValue(GeneType.SIZE_CAP)
+				&& genome.getGeneValue(GeneType.GROW_BEHAVIOUR) > energy / (size * ENERGY_PER_SIZE)) {
 			grow();
 		}
 
-		if (genome.get(GeneType.REPRODUCE_BEHAVIOUR.ordinal()).getValue() > (energy - reproduceCost())
-				/ (size * ENERGY_PER_SIZE)) {
+		if (genome.getGeneValue(GeneType.REPRODUCE_BEHAVIOUR) > (energy - reproduceCost()) / (size * ENERGY_PER_SIZE)) {
 			reproduce();
 		}
 	}
@@ -56,19 +54,24 @@ public class Plant extends Creature {
 		return child;
 	}
 
-	public float reproduceCost() {
-		return (STARTING_SIZE * ENERGY_PER_SIZE) + (STARTING_SIZE * SEED_RANGE);
-	}
-
-	public float growCost() {
-		return ENERGY_PER_SIZE;
-	}
-
 	public void sustain() {
 		energy -= size * SUSTAIN_EFFICIENCY;
 	}
 
 	public void grow() {
 		energy -= growCost();
+	}
+
+	public float reproduceCost() {
+		return (genome.getGeneValue(GeneType.STARTING_SIZE) * ENERGY_PER_SIZE)
+				+ (genome.getGeneValue(GeneType.STARTING_SIZE) * genome.getGeneValue(GeneType.SEED_RANGE));
+	}
+
+	public float growCost() {
+		return ENERGY_PER_SIZE;
+	}
+
+	public float sustainCost() {
+		return size * SUSTAIN_EFFICIENCY;
 	}
 }

@@ -2,7 +2,7 @@ package main;
 
 import java.util.Random;
 
-public class Gene {
+public class Gene implements Cloneable {
 	private final float MIN_VALUE;
 	private final float MAX_VALUE;
 	private final float INCREMENTS;
@@ -35,5 +35,10 @@ public class Gene {
 	
 	public float getValue() {
 		return value;
+	}
+
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return (Gene) super.clone();
 	}
 }
