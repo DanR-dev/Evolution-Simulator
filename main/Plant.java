@@ -1,5 +1,6 @@
 package main;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class Plant extends Creature {
@@ -7,29 +8,28 @@ public class Plant extends Creature {
 	protected static final int MAX_SEED_RANGE = 10;
 	protected static final float SUSTAIN_EFFICIENCY = 1;
 
-	// full genome:
-	protected final int MUTATION_RATE;
-	protected final int SIZE_CAP;
-	protected final float REPRODUCE_BEHAVIOUR;
-	protected final float GROW_BEHAVIOUR;
-	protected final int STARTING_SIZE;
-	protected final int SEED_RANGE;
-
 	public static Plant randomPlant() {
 		Random rng = new Random();
-		return new Plant(rng.nextInt(MAX_MUTATION) + 1, rng.nextInt(MAX_SIZE) + 1, rng.nextFloat(), rng.nextFloat(), 1,
+		return new Plant(rng.nextInt(MAX_MUTATION) + 1, rng.nextFloat(), rng.nextFloat(), rng.nextInt(MAX_SIZE) + 1, 1,
 				rng.nextInt(MAX_SEED_RANGE) + 1);
 	}
 
-	public Plant(int mutationRate, int sizeCap, float reproduceBehaviour, float growBehaviour, int startingSize,
-			int seedRange) {
-		super();
-		MUTATION_RATE = mutationRate;
-		SIZE_CAP = sizeCap;
-		REPRODUCE_BEHAVIOUR = reproduceBehaviour;
-		GROW_BEHAVIOUR = growBehaviour;
-		STARTING_SIZE = startingSize;
-		SEED_RANGE = seedRange;
+	public static void main(String[] args) {
+		int test = 1;
+		Plant parent = randomPlant();
+		Plant child = parent.reproduce();
+	}
+
+	public Plant(int mutationRate, float reproduceBehaviour, float growBehaviour, int sizeCap, int startingSize,
+			int seedRange) { // grows with genome
+		super(mutationRate, reproduceBehaviour, growBehaviour, startingSize);
+		genome.add(GeneType.SIZE_CAP.ordinal(), new Gene(1, MAX_SIZE, 1, sizeCap));
+		genome.add(GeneType.STARTING_SIZE.ordinal(), new Gene(1, MAX_SIZE, 1, startingSize));
+		genome.add(GeneType.SEED_RANGE.ordinal(), new Gene(1, MAX_SEED_RANGE, 1, seedRange));
+	}
+
+	public Plant(ArrayList<Gene> parentGenome) {
+		super(parentGenome, (int) parentGenome.get(GeneType.STARTING_SIZE.ordinal()).getValue());
 	}
 
 	public void chooseBehaviour() {
@@ -38,32 +38,22 @@ public class Plant extends Creature {
 			die();
 		}
 
-		if (size < SIZE_CAP && GROW_BEHAVIOUR > energy / (size * ENERGY_PER_SIZE)) {
+		if (size < genome.get(GeneType.SIZE_CAP.ordinal()).getValue()
+				&& genome.get(GeneType.GROW_BEHAVIOUR.ordinal()).getValue() > energy / (size * ENERGY_PER_SIZE)) {
 			grow();
 		}
 
-		if (REPRODUCE_BEHAVIOUR > (energy - reproduceCost()) / (size * ENERGY_PER_SIZE)) {
+		if (genome.get(GeneType.REPRODUCE_BEHAVIOUR.ordinal()).getValue() > (energy - reproduceCost())
+				/ (size * ENERGY_PER_SIZE)) {
 			reproduce();
 		}
 	}
 
 	public Plant reproduce() {
-		Plant child;
-
-		try {
-			child = (Plant) this.clone();
-
-			child.size = this.STARTING_SIZE;
-			child.energy = child.size * ENERGY_PER_SIZE;
-
-			child.mutate();
-
-			this.energy -= reproduceCost();
-
-			return child;
-		} catch (Exception e) {
-			throw new RuntimeException("plant cloning error");
-		}
+		Plant child = new Plant(genome);
+		child.genome.mutate();
+		this.energy -= reproduceCost();
+		return child;
 	}
 
 	public float reproduceCost() {
@@ -80,9 +70,5 @@ public class Plant extends Creature {
 
 	public void grow() {
 		energy -= growCost();
-	}
-
-	public void mutate() {
-
 	}
 }
