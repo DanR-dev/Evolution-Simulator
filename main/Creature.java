@@ -14,7 +14,8 @@ public abstract class Creature {
 	protected float energy;
 
 	public abstract Creature[] reproduce();
-	public abstract void chooseBehaviour();
+	public abstract boolean survive();
+	public abstract void chooseBehaviour(Environment environment, EnvironmentTile tile);
 	
 	public Creature(int mutationRate, float reproduceBehaviour, float growBehaviour, int size) {
 		genome = new Genome();

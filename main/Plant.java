@@ -66,19 +66,22 @@ public class Plant extends Creature {
 		super(parentGenome, (int) parentGenome.getGeneValue(GeneType.STARTING_SIZE));
 	}
 
-	public void chooseBehaviour() {
+	public boolean survive() {
 		sustain();
 		if (energy <= 0) {
-			die();
+			return false;
+		} else {
+			return true;
 		}
+	}
 
+	public void chooseBehaviour(Environment environment, EnvironmentTile tile) {
 		if (size < genome.getGeneValue(GeneType.SIZE_CAP)
 				&& genome.getGeneValue(GeneType.GROW_BEHAVIOUR) > (energy - growCost()) / (size * ENERGY_PER_SIZE)) {
 			grow();
-		}
-
-		if (genome.getGeneValue(GeneType.REPRODUCE_BEHAVIOUR) > (energy - reproduceCost()) / (size * ENERGY_PER_SIZE)) {
-			reproduce();
+		} else if (genome.getGeneValue(GeneType.REPRODUCE_BEHAVIOUR) > (energy - reproduceCost())
+				/ (size * ENERGY_PER_SIZE)) {
+			environment.scatter(tile, (int) genome.getGeneValue(GeneType.SEED_RANGE), reproduce());
 		}
 	}
 
@@ -132,7 +135,7 @@ public class Plant extends Creature {
 				+ (genome.getGeneValue(GeneType.SIZE_CAP) * ENERGY_PER_SIZE - reproduceCost()));
 		System.out.println("remainder required for behaviour = " + genome.getGeneValue(GeneType.SIZE_CAP)
 				* ENERGY_PER_SIZE * genome.getGeneValue(GeneType.REPRODUCE_BEHAVIOUR));
-		
+
 		if (growCost() + sustainCost() >= genome.getGeneValue(GeneType.STARTING_SIZE) * ENERGY_PER_SIZE
 				* (1 - genome.getGeneValue(GeneType.GROW_BEHAVIOUR))) {
 			return true;
