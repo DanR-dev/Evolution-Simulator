@@ -17,21 +17,29 @@ public class Plant extends Creature {
 		Plant parent = randomPlant();
 		Plant[] children = parent.reproduce();
 		Plant[][] grandChildren = new Plant[children.length][];
-		
-		for(int i = 0; i < children.length; i++) {
+
+		for (int i = 0; i < children.length; i++) {
 			grandChildren[i] = children[i].reproduce();
 		}
 
 		System.out.println("parent:\n" + parent.genome.toString());
 		System.out.println("children: ");
 		for (int i = 0; i < children.length; i++) {
-			System.out.println("child: " + i + " : " + children[i].genome.toString());
+			if (children[i].isGeneticDeadEnd()) {
+				System.out.println("child: " + i + " : genetic dead end");
+			} else {
+				System.out.println("child: " + i + " : " + children[i].genome.toString());
+			}
 		}
 		System.out.println("grandchildren: ");
 		for (int i = 0; i < children.length; i++) {
 			System.out.println("through child: " + i);
-			for(Plant plant : grandChildren[i]) {
-				System.out.println(plant.genome.toString());
+			for (Plant plant : grandChildren[i]) {
+				if (plant.isGeneticDeadEnd()) {
+					System.out.println("genetic dead end");
+				} else {
+					System.out.println(plant.genome.toString());
+				}
 			}
 		}
 	}
@@ -65,7 +73,7 @@ public class Plant extends Creature {
 		}
 
 		if (size < genome.getGeneValue(GeneType.SIZE_CAP)
-				&& genome.getGeneValue(GeneType.GROW_BEHAVIOUR) > energy / (size * ENERGY_PER_SIZE)) {
+				&& genome.getGeneValue(GeneType.GROW_BEHAVIOUR) > (energy - growCost()) / (size * ENERGY_PER_SIZE)) {
 			grow();
 		}
 
@@ -106,5 +114,34 @@ public class Plant extends Creature {
 
 	public float sustainCost() {
 		return size * SUSTAIN_COST;
+	}
+
+	public boolean isGeneticDeadEnd() {
+
+		System.out.println("***********************************************************************************");
+		System.out.println("grow cost = " + growCost());
+		System.out.println("starting energy = " + genome.getGeneValue(GeneType.STARTING_SIZE) * ENERGY_PER_SIZE);
+		System.out.println("energy after growth = "
+				+ (genome.getGeneValue(GeneType.STARTING_SIZE) * ENERGY_PER_SIZE - growCost()));
+		System.out.println("remainder required for behaviour = " + genome.getGeneValue(GeneType.STARTING_SIZE)
+				* ENERGY_PER_SIZE * genome.getGeneValue(GeneType.GROW_BEHAVIOUR));
+		System.out.println("____________________________________________________________________________________");
+		System.out.println("reproduce cost = " + reproduceCost());
+		System.out.println("max energy = " + genome.getGeneValue(GeneType.SIZE_CAP) * ENERGY_PER_SIZE);
+		System.out.println("energy after reproduction = "
+				+ (genome.getGeneValue(GeneType.SIZE_CAP) * ENERGY_PER_SIZE - reproduceCost()));
+		System.out.println("remainder required for behaviour = " + genome.getGeneValue(GeneType.SIZE_CAP)
+				* ENERGY_PER_SIZE * genome.getGeneValue(GeneType.REPRODUCE_BEHAVIOUR));
+		
+		if (growCost() + sustainCost() >= genome.getGeneValue(GeneType.STARTING_SIZE) * ENERGY_PER_SIZE
+				* (1 - genome.getGeneValue(GeneType.GROW_BEHAVIOUR))) {
+			return true;
+		}
+		if (reproduceCost() + sustainCost() >= genome.getGeneValue(GeneType.SIZE_CAP) * ENERGY_PER_SIZE
+				* (1 - genome.getGeneValue(GeneType.REPRODUCE_BEHAVIOUR))) {
+			return true;
+		}
+
+		return false;
 	}
 }
