@@ -37,15 +37,6 @@ public class Genome implements Cloneable {
 			}
 		}
 	}
-	
-	@Override
-	public String toString() {
-		String result = "Genome: ";
-		for(Gene gene : genes) {
-			result += gene.getValue() + ", ";
-		}
-		return result;
-	}
 
 	@Override
 	public Object clone() throws CloneNotSupportedException {
@@ -55,5 +46,18 @@ public class Genome implements Cloneable {
 			shallowCopy.genes.add((Gene) gene.clone());
 		}
 		return shallowCopy;
+	}
+	
+	@Override
+	public String toString() {
+		GeneType[] types = GeneType.values();
+		String result = "(";
+		for(GeneType type : types) {
+			if(genes.get(type.ordinal()) != null) {
+				result += type + ": " + genes.get(type.ordinal()) + ", ";
+			}
+		}
+		result += ")";
+		return result;
 	}
 }

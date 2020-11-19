@@ -20,7 +20,11 @@ public class EnvironmentTile {
 	}
 	
 	public Creature[] getCreatures() {
-		return (Creature[]) creatures.toArray();
+		if(creatures.size() > 0) {
+			return (Creature[]) creatures.toArray();
+		} else {
+			return new Creature[0];
+		}
 	}
 	
 	public void bufferCreatures() {

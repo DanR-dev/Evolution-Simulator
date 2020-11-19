@@ -41,4 +41,9 @@ public class Gene implements Cloneable {
 	public Object clone() throws CloneNotSupportedException {
 		return (Gene) super.clone();
 	}
+	
+	@Override
+	public String toString() {
+		return (value + "+-" + INCREMENTS);
+	}
 }
