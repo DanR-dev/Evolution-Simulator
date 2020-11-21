@@ -1,4 +1,4 @@
-package main;
+package environments;
 
 public class EnvironmentalCondition {
 

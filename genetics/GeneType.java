@@ -1,4 +1,4 @@
-package main;
+package genetics;
 
 public enum GeneType {
 	//creature genes, required

@@ -1,6 +1,8 @@
-package main;
+package environments;
 
 import java.util.ArrayList;
+
+import creatures.Creature;
 
 public class EnvironmentTile {
 	private ArrayList<Creature> creatures = new ArrayList<Creature>();

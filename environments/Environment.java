@@ -1,7 +1,10 @@
-package main;
+package environments;
 
 import java.util.ArrayList;
 import java.util.Random;
+
+import creatures.Creature;
+import creatures.Plant;
 
 public class Environment {
 	private EnvironmentTile[][] tiles;

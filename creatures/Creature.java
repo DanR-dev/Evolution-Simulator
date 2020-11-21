@@ -1,4 +1,10 @@
-package main;
+package creatures;
+
+import environments.Environment;
+import environments.EnvironmentTile;
+import genetics.Gene;
+import genetics.GeneType;
+import genetics.Genome;
 
 /*
  * "size" = volume

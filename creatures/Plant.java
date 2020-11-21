@@ -1,7 +1,13 @@
-package main;
+package creatures;
 
 import java.text.DecimalFormat;
 import java.util.Random;
+
+import environments.Environment;
+import environments.EnvironmentTile;
+import genetics.Gene;
+import genetics.GeneType;
+import genetics.Genome;
 
 public class Plant extends Creature {
 	protected static final int SUSTAIN_COST = 1;

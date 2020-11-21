@@ -1,4 +1,4 @@
-package main;
+package creatures;
 
 public enum BehaviourType {
 	GROW,
