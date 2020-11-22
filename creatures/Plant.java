@@ -20,6 +20,7 @@ public class Plant extends Creature {
 	protected static final float GROW_EFFICIENCY = 0.5F;
 	protected static final float CLONE_EFFICIENCY = 0.5F;
 	protected static final float SEED_EFFICIENCY = 0.5F;
+	protected static final float PHOTO_EFFICIENCY = 0.5F;
 	
 	protected static final Color PLANT_COLOR = Color.GREEN;
 
@@ -144,6 +145,15 @@ public class Plant extends Creature {
 	
 	public Color getCreatureColor() {
 		return PLANT_COLOR;
+	}
+	
+	public float photosynthesise(float availableEnergy) {
+		energy += availableEnergy * PHOTO_EFFICIENCY;
+
+		if(energy > size * ENERGY_PER_SIZE) {
+			energy = size * ENERGY_PER_SIZE;
+		}
+		return availableEnergy * (1 - PHOTO_EFFICIENCY);
 	}
 
 	@Override

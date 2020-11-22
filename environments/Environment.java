@@ -31,6 +31,7 @@ public class Environment extends GridPane{
 			for (int j = 0; j < height; j++) {
 				tiles[i][j] = new EnvironmentTile(i, j);
 				add(tiles[i][j], i, j);
+				tiles[i][j].generatePlants(3);
 			}
 		}
 		

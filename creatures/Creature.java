@@ -18,7 +18,7 @@ import javafx.scene.shape.Circle;
  * "size" = volume
  */
 
-public abstract class Creature extends Circle{
+public abstract class Creature extends Circle implements Comparable<Creature>{
 	public static final int MAX_MUTATION = 10;
 	public static final float ENERGY_PER_SIZE = 100;
 	public static final int MAX_SIZE = 100;
@@ -74,5 +74,16 @@ public abstract class Creature extends Circle{
 	
 	public int getSize() {
 		return size;
+	}
+	
+	@Override
+	public int compareTo(Creature creature) {
+		if(size < creature.getSize()) {
+			return -1;
+		} else if(size > creature.getSize()) {
+			return 1;
+		} else {
+			return 0;
+		}
 	}
 }
