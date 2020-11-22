@@ -1,4 +1,4 @@
-package backEnd.environments;
+package environments;
 
 public class EnvironmentalCondition {
 

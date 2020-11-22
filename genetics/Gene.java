@@ -1,4 +1,4 @@
-package backEnd.genetics;
+package genetics;
 
 import java.util.Random;
 

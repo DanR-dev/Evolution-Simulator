@@ -1,16 +1,14 @@
-package backEnd.environments;
+package environments;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-import backEnd.creatures.Creature;
-import backEnd.creatures.Plant;
-
+import creatures.Creature;
+import creatures.Plant;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.TilePane;
 import javafx.scene.text.Text;
 
-public class Environment {
+public class Environment extends GridPane{
 	private EnvironmentTile[][] tiles;
 
 	public static void main(String[] args) {
@@ -27,12 +25,17 @@ public class Environment {
 	}
 
 	public Environment(int width, int height) {
+		super();
 		tiles = new EnvironmentTile[width][height];
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
 				tiles[i][j] = new EnvironmentTile(i, j);
+				add(tiles[i][j], i, j);
 			}
 		}
+		
+		this.setGridLinesVisible(true);
+		refresh();
 	}
 
 	public EnvironmentTile getTile(int x, int y) { // wraps
@@ -79,15 +82,11 @@ public class Environment {
 		}
 	}
 
-	public TilePane getDisplay() {
-		TilePane tileGrid = new TilePane();
-		
+	public void refresh() {
 		for(int i = 0; i < tiles.length; i++) {
 			for(int j = 0; j < tiles[0].length; j++) {
-				tileGrid(tiles[i][j].getDisplay(), i, j);
+				tiles[i][j].refresh();
 			}
 		}
-		
-		return tileGrid;
 	}
 }

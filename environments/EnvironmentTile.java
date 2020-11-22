@@ -1,13 +1,12 @@
-package backEnd.environments;
+package environments;
 
 import java.util.ArrayList;
 
-import backEnd.creatures.Creature;
+import creatures.Creature;
+import creatures.Plant;
+import javafx.scene.layout.StackPane;
 
-import javafx.scene.Group;
-import javafx.scene.text.Text;
-
-public class EnvironmentTile {
+public class EnvironmentTile extends StackPane{
 	private ArrayList<Creature> creatures = new ArrayList<Creature>();
 	private ArrayList<EnvironmentalCondition> conditions = new ArrayList<EnvironmentalCondition>();
 	private int x;
@@ -16,8 +15,18 @@ public class EnvironmentTile {
 	Creature[] creatureBuffer;
 	
 	public EnvironmentTile(int x, int y) {
+		super();
 		this.x = x;
 		this.y = y;
+		
+		this.setMinHeight(40);
+		this.setMinWidth(40);
+		
+		this.addCreature(Plant.randomPlant()); //
+		this.addCreature(Plant.randomPlant()); //
+		this.addCreature(Plant.randomPlant()); //
+		this.addCreature(Plant.randomPlant()); //
+		this.addCreature(Plant.randomPlant()); //
 	}
 	
 	public void addCreature(Creature creature) {
@@ -50,11 +59,16 @@ public class EnvironmentTile {
 		return y;
 	}
 	
-	public Group getDisplay() {
-		Group tileDisplay = new Group();
-		
-		tileDisplay.getChildren().add(new Text("Tile: " + x + ", " + y));
-		
-		return tileDisplay;
+	public void refresh() {
+		getChildren().clear();
+		for(int i = 0; i < Creature.MAX_SIZE; i++) {
+			for(Creature creature : creatures) {
+				if(creature.getSize() == i) {
+					creature.refresh();
+					getChildren().add(creature);
+					setAlignment(creature, creature.POSITION_ON_TILE);
+				}
+			}
+		}
 	}
 }

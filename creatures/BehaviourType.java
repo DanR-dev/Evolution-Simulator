@@ -1,4 +1,4 @@
-package backEnd.creatures;
+package creatures;
 
 public enum BehaviourType {
 	GROW,

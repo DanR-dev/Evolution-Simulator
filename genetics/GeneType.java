@@ -1,4 +1,4 @@
-package backEnd.genetics;
+package genetics;
 
 public enum GeneType {
 	//creature genes, required

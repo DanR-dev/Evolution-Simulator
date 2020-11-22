@@ -1,9 +1,8 @@
-package frontEnd.windows;
+package frontEnd;
 
 import java.util.ArrayList;
 
-import backEnd.environments.Environment;
-
+import environments.Environment;
 import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
@@ -23,8 +22,8 @@ public class SimWindow extends Stage {
 		environments.add(new Environment(envWidth, envHeight));
 		environments.add(new Environment(envWidth, envHeight));
 
-		environmentGrid.add(environments.get(0).getDisplay(), 0, 0);
-		environmentGrid.add(environments.get(1).getDisplay(), 1, 0);
+		environmentGrid.add(environments.get(0), 0, 0);
+		environmentGrid.add(environments.get(1), 1, 0);
 
 		setScene(scene);
 		setTitle("Simulation");
