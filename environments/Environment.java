@@ -39,8 +39,37 @@ public class Environment extends GridPane{
 		refresh();
 	}
 
+	public Environment(int width, int height, int nClusters, int clusterSize, int clusterWidth) {
+		super();
+		Random rng = new Random();
+		int clusterX;
+		int clusterY;
+		Creature[] clusterCreatures;
+		
+		tiles = new EnvironmentTile[width][height];
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
+				tiles[i][j] = new EnvironmentTile(i, j);
+				add(tiles[i][j], i, j);
+			}
+		}
+
+		for(int i = 0; i < nClusters; i++) {
+			clusterX = rng.nextInt(tiles.length);
+			clusterY = rng.nextInt(tiles[0].length);
+			clusterCreatures = new Creature[clusterSize];
+			for(int j = 0; j < clusterSize; j++) {
+				clusterCreatures[j] = Plant.randomPlant();
+			}
+			scatter(tiles[clusterX][clusterY], clusterWidth, clusterCreatures);
+		}
+		
+		this.setGridLinesVisible(true);
+		refresh();
+	}
+
 	public EnvironmentTile getTile(int x, int y) { // wraps
-		return tiles[x % tiles.length][y % tiles[0].length];
+		return tiles[(x + tiles.length) % tiles.length][(y + tiles[0].length) % tiles[0].length];
 	}
 
 	public void timeStep() {

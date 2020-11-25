@@ -7,7 +7,7 @@ public class AppRoot extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		stage = new SimWindow(3, 4);
+		stage = new SimWindow(15, 7);
 		stage.show();
 	}
 	
