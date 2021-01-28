@@ -9,6 +9,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 
 public class Environment extends GridPane{
+	private final static float SUNLIGHT = 100;
+	
 	private EnvironmentTile[][] tiles;
 
 	public static void main(String[] args) {
@@ -69,7 +71,19 @@ public class Environment extends GridPane{
 	}
 
 	public EnvironmentTile getTile(int x, int y) { // wraps
-		return tiles[(x + tiles.length) % tiles.length][(y + tiles[0].length) % tiles[0].length];
+		int trueX;
+		int trueY;
+		if(x >= 0) {
+			trueX = x % tiles.length;
+		} else {
+			trueX = -(x % tiles.length);
+		}
+		if(y >= 0) {
+			trueY = y % tiles[0].length;
+		} else {
+			trueY = -(y % tiles[0].length);
+		}
+		return tiles[trueX][trueY];
 	}
 
 	public void timeStep() {
@@ -84,7 +98,7 @@ public class Environment extends GridPane{
 		}
 		for (int i = 0; i < tiles.length; i++) {
 			for (int j = 0; j < tiles[0].length; j++) {
-				getTile(i, j).simulateCreatures(this);
+				getTile(i, j).simulateCreatures(this, SUNLIGHT);
 			}
 		}
 	}

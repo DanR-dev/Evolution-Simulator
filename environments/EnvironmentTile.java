@@ -48,7 +48,8 @@ public class EnvironmentTile extends StackPane{
 		creatureBuffer = getCreatures();
 	}
 	
-	public void simulateCreatures(Environment environment) {
+	public void simulateCreatures(Environment environment, float sunlight) {
+		photosynthesise(sunlight);
 		for(Creature creature : creatureBuffer) {
 			creature.chooseBehaviour(environment, this);
 		}
