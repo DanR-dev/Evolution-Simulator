@@ -54,7 +54,7 @@ public class Genome implements Cloneable {
 		String result = "(";
 		for(GeneType type : types) {
 			if(genes.get(type.ordinal()) != null) {
-				result += type + ": " + genes.get(type.ordinal()) + ", ";
+				result += type + ": " + genes.get(type.ordinal()) + "\n";
 			}
 		}
 		result += ")";

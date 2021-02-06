@@ -5,6 +5,7 @@ public enum GeneType {
 	MUTATION_RATE,
 	REPRODUCE_BEHAVIOUR,
 	GROW_BEHAVIOUR,
+	AGE_CAP,
 	
 	//creature genes, optional
 	SIZE_CAP,

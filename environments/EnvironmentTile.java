@@ -15,8 +15,6 @@ public class EnvironmentTile extends StackPane{
 	
 	private int tileSize = 60;
 	
-	Creature[] creatureBuffer;
-	
 	public EnvironmentTile(int x, int y) {
 		super();
 		this.x = x;
@@ -30,12 +28,16 @@ public class EnvironmentTile extends StackPane{
 		creatures.add(creature);
 	}
 	
+	public void removeCreature(Creature creature) {
+		creatures.remove(creature);
+	}
+	
 	public Creature[] getCreatures() {
-		if(creatures.size() > 0) {
-			return (creatures.toArray(new Creature[0]));
-		} else {
-			return new Creature[0];
+		Creature[] temp = new Creature[creatures.size()];
+		for(int i = 0; i < creatures.size(); i++) {
+			temp[i] = creatures.get(i);
 		}
+		return temp;
 	}
 	
 	public void generatePlants(int n) {
@@ -44,14 +46,10 @@ public class EnvironmentTile extends StackPane{
 		}
 	}
 	
-	public void bufferCreatures() {
-		creatureBuffer = getCreatures();
-	}
-	
 	public void simulateCreatures(Environment environment, float sunlight) {
 		photosynthesise(sunlight);
-		for(Creature creature : creatureBuffer) {
-			creature.chooseBehaviour(environment, this);
+		for(int i = 0; i < creatures.size(); i++) {
+			creatures.get(i).chooseBehaviour(environment, this);
 		}
 	}
 	
@@ -77,7 +75,6 @@ public class EnvironmentTile extends StackPane{
 	}
 	
 	public Plant[] getPlants() {
-		Creature[] creatures = getCreatures();
 		ArrayList<Plant> plants = new ArrayList<Plant>();
 		for(Creature creature : creatures) {
 			try {
@@ -96,6 +93,7 @@ public class EnvironmentTile extends StackPane{
 		}
 	}
 	
+	/**
 	public static void main(String[] args) {
 		EnvironmentTile tile = new EnvironmentTile(0, 0);
 		tile.generatePlants(5);
@@ -108,4 +106,5 @@ public class EnvironmentTile extends StackPane{
 			System.out.println(creature.toString());
 		}
 	}
+	*/
 }

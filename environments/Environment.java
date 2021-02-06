@@ -6,13 +6,13 @@ import java.util.Random;
 import creatures.Creature;
 import creatures.Plant;
 import javafx.scene.layout.GridPane;
-import javafx.scene.text.Text;
 
 public class Environment extends GridPane{
-	private final static float SUNLIGHT = 100;
+	private final static float SUNLIGHT = 200;
 	
 	private EnvironmentTile[][] tiles;
 
+	/**
 	public static void main(String[] args) {
 		Environment environment = new Environment(10, 5);
 		Plant[] testPlants = new Plant[10];
@@ -25,6 +25,7 @@ public class Environment extends GridPane{
 
 		environment.timeStep();
 	}
+	*/
 
 	public Environment(int width, int height) {
 		super();
@@ -93,14 +94,10 @@ public class Environment extends GridPane{
 	public void simulateCreatures() {
 		for (int i = 0; i < tiles.length; i++) {
 			for (int j = 0; j < tiles[0].length; j++) {
-				getTile(i, j).bufferCreatures();
-			}
-		}
-		for (int i = 0; i < tiles.length; i++) {
-			for (int j = 0; j < tiles[0].length; j++) {
 				getTile(i, j).simulateCreatures(this, SUNLIGHT);
 			}
 		}
+		refresh();
 	}
 
 	public Creature[] getCreatures() {
@@ -121,8 +118,7 @@ public class Environment extends GridPane{
 		Random rng = new Random();
 
 		for (Creature creature : creatures) {
-			getTile(tile.getX() + rng.nextInt(dist * 2 + 1) - dist, tile.getY() + rng.nextInt(dist * 2 + 1) - dist)
-					.addCreature(creature);
+			getTile(tile.getX() + rng.nextInt(dist * 2 + 1) - dist, tile.getY() + rng.nextInt(dist * 2 + 1) - dist).addCreature(creature);
 		}
 	}
 
