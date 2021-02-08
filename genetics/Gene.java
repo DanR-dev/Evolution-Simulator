@@ -3,9 +3,9 @@ package genetics;
 import java.util.Random;
 
 public class Gene implements Cloneable {
+	private final float INCREMENTS;
 	private final float MIN_VALUE;
 	private final float MAX_VALUE;
-	private final float INCREMENTS;
 	private float value;
 	
 	public Gene(float minValue, float maxValue, float increments, float value) {
@@ -21,6 +21,20 @@ public class Gene implements Cloneable {
 			this.value = value;
 		}
 	}
+
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return (Gene) super.clone();
+	}
+	
+	@Override
+	public String toString() {
+		return (value + "+-" + INCREMENTS);
+	}
+	
+	public float getValue() {
+		return value;
+	}
 	
 	public void mutate() {
 		Random rng = new Random();
@@ -31,19 +45,5 @@ public class Gene implements Cloneable {
 		} else if(value > MAX_VALUE) {
 			value = MAX_VALUE;
 		}
-	}
-	
-	public float getValue() {
-		return value;
-	}
-
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		return (Gene) super.clone();
-	}
-	
-	@Override
-	public String toString() {
-		return (value + "+-" + INCREMENTS);
 	}
 }

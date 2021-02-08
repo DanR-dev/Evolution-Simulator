@@ -11,8 +11,27 @@ public class Genome implements Cloneable {
 		genes = new ArrayList<Gene>();
 	}
 
-	public void addGene(GeneType type, Gene gene) {
-		genes.add(type.ordinal(), gene);
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		Genome shallowCopy = (Genome) super.clone();
+		shallowCopy.genes = new ArrayList<Gene>();
+		for(Gene gene : this.genes){
+			shallowCopy.genes.add((Gene) gene.clone());
+		}
+		return shallowCopy;
+	}
+	
+	@Override
+	public String toString() {
+		GeneType[] types = GeneType.values();
+		String result = "(";
+		for(GeneType type : types) {
+			if(genes.get(type.ordinal()) != null) {
+				result += type + ": " + genes.get(type.ordinal()) + "\n";
+			}
+		}
+		result += ")";
+		return result;
 	}
 
 	public Gene getGene(GeneType type) {
@@ -38,26 +57,7 @@ public class Genome implements Cloneable {
 		}
 	}
 
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		Genome shallowCopy = (Genome) super.clone();
-		shallowCopy.genes = new ArrayList<Gene>();
-		for(Gene gene : this.genes){
-			shallowCopy.genes.add((Gene) gene.clone());
-		}
-		return shallowCopy;
-	}
-	
-	@Override
-	public String toString() {
-		GeneType[] types = GeneType.values();
-		String result = "(";
-		for(GeneType type : types) {
-			if(genes.get(type.ordinal()) != null) {
-				result += type + ": " + genes.get(type.ordinal()) + "\n";
-			}
-		}
-		result += ")";
-		return result;
+	public void addGene(GeneType type, Gene gene) {
+		genes.add(type.ordinal(), gene);
 	}
 }
