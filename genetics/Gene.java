@@ -36,6 +36,10 @@ public class Gene implements Cloneable {
 		return value;
 	}
 	
+	public float getMagnitude() {
+		return (value - MIN_VALUE) / (MAX_VALUE - MIN_VALUE);
+	}
+	
 	public void mutate() {
 		Random rng = new Random();
 		

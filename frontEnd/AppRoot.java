@@ -12,9 +12,10 @@ public class AppRoot extends Application {
 		stage.show();
 	}
 	
-	public void creatureWindow(Creature creature) {
-		CreatureWindow stage = new CreatureWindow(creature);
-		stage.show();
+	public CreatureWindow creatureWindow(Creature creature) {
+		CreatureWindow creatureWindow = new CreatureWindow(creature);
+		creatureWindow.show();
+		return creatureWindow;
 	}
 	
 	@Override

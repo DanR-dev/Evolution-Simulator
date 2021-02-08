@@ -13,7 +13,7 @@ import javafx.scene.paint.Color;
 
 public class Plant extends Creature {
 	protected static final Color PLANT_COLOR = Color.GREEN;
-	protected static final float SUSTAIN_EFFICIENCY = 0.7F;
+	protected static final float SUSTAIN_EFFICIENCY = 0.5F;
 	protected static final float CLONE_EFFICIENCY = 0.5F;
 	protected static final float PHOTO_EFFICIENCY = 0.5F;
 	protected static final float GROW_EFFICIENCY = 0.5F;
@@ -21,7 +21,7 @@ public class Plant extends Creature {
 	protected static final int MAX_STARTING_SIZE = 5;
 	protected static final int MAX_SEED_RANGE = 10;
 	protected static final int MAX_GROW_BATCH = 1;
-	protected static final int MAX_SEED_BATCH = 5;
+	protected static final int MAX_SEED_BATCH = 1;
 	protected static final int MAX_SIZE = 100;
 
 	public static Plant randomPlant(AppRoot root) {
