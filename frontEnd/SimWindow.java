@@ -44,6 +44,7 @@ public class SimWindow extends Stage {
         });
 		environmentGrid.add(testButton, 0, 0);
 
+		root.statWindow(environments.get(0));
 		
 		setScene(scene);
 		setTitle("Simulation");

@@ -24,7 +24,7 @@ public class Genome implements Cloneable {
 		}
 		return shallowCopy;
 	}
-	
+
 	@Override
 	public String toString() {
 		GeneType[] types = GeneType.values();

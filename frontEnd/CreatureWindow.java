@@ -17,9 +17,4 @@ public class CreatureWindow extends Stage {
 		setScene(scene);
 		setTitle("Simulation");
 	}
-	
-	@Override
-	public void close() {
-		System.out.println("test");
-	}
 }

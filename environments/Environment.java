@@ -6,11 +6,24 @@ import java.util.Random;
 import creatures.Creature;
 import creatures.Plant;
 import frontEnd.AppRoot;
+import javafx.collections.ObservableList;
+import javafx.scene.chart.Axis;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.Chart;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart.Series;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.layout.GridPane;
 
 public class Environment extends GridPane {
+	private static final int HISTORY_LENGTH = 1000;
 	private final static float SUNLIGHT = 200;
 	private final AppRoot ROOT;
+
+	private BarChart<String, Number> sizeHistogram;
+	private LineChart<Number, Number> biomassGraph;
 
 	private EnvironmentTile[][] tiles;
 
@@ -55,6 +68,92 @@ public class Environment extends GridPane {
 		this.setGridLinesVisible(true);
 	}
 
+	private Chart sizeHistogram() {
+		CategoryAxis xAxis = new CategoryAxis();
+		NumberAxis yAxis = new NumberAxis();
+		Series<String, Number> series = new Series<String, Number>();
+
+		xAxis.setLabel("Size");
+		yAxis.setLabel("Number");
+		sizeHistogram = new BarChart<String, Number>(xAxis, yAxis);
+		sizeHistogram.setTitle("Creature size");
+		sizeHistogram.getData().add(series);
+		refreshSizeHistogram();
+		return sizeHistogram;
+	}
+
+	private void refreshSizeHistogram() {
+		if (sizeHistogram != null) {
+			Series<String, Number> series;
+			ObservableList<Data<String, Number>> data;
+			Creature[] creatures = getCreatures();
+			int numSize;
+
+			series = sizeHistogram.getData().get(0);
+
+			data = series.getData();
+
+			for (int i = 1; i < Creature.MAX_SIZE; i++) {
+				numSize = 0;
+				for (Creature creature : creatures) {
+					if (creature.getSize() == i) {
+						numSize++;
+					}
+				}
+				data.add(new Data<String, Number>("" + i, numSize));
+			}
+		}
+	}
+
+	private Chart biomassGraph() {
+		NumberAxis xAxis = new NumberAxis();
+		NumberAxis yAxis = new NumberAxis();
+		Series<Number, Number> series = new Series<Number, Number>();
+
+		xAxis.setLabel("Time");
+		yAxis.setLabel("Total Biomass");
+		biomassGraph = new LineChart<Number, Number>(xAxis, yAxis);
+		biomassGraph.setTitle("Biomass Over Time");
+		
+		biomassGraph.getData().add(series);
+		refreshSizeHistogram();
+		return biomassGraph;
+	}
+
+	private void refreshBiomassGraph() {
+		if (biomassGraph != null) {
+			Series<Number, Number> series;
+			ObservableList<Data<Number, Number>> data;
+			Creature[] creatures = getCreatures();
+			int totalMass = 0;
+
+			series = biomassGraph.getData().get(0);
+			data = series.getData();
+
+			for (Creature creature : creatures) {
+				totalMass += creature.getSize();
+			}
+			data.add(new Data<Number, Number>(0, totalMass));
+			
+			if(data.size() > HISTORY_LENGTH) {
+				data.remove(0);
+			}
+			
+			for(int i = 0; i < data.size(); i++) {
+				data.get(i).setXValue(i - data.size() + 1);
+			}
+		}
+	}
+
+	public Chart[] getCharts() {
+		Chart[] charts = new Chart[2];
+
+		charts[0] = sizeHistogram();
+		charts[1] = biomassGraph();
+
+		return charts;
+	}
+
 	public Creature[] getCreatures() {
 		ArrayList<Creature> creatures = new ArrayList<Creature>();
 
@@ -66,7 +165,7 @@ public class Environment extends GridPane {
 			}
 		}
 
-		return (Creature[]) creatures.toArray();
+		return creatures.toArray(new Creature[0]);
 	}
 
 	public EnvironmentTile getTile(int x, int y) { // wraps
@@ -111,6 +210,9 @@ public class Environment extends GridPane {
 				tiles[i][j].refresh();
 			}
 		}
+
+		refreshSizeHistogram();
+		refreshBiomassGraph();
 	}
 
 	public void timeStep() {
