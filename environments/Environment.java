@@ -23,8 +23,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class Environment extends VBox {
-	private static final int HISTORY_LENGTH = 1000;
 	private final static float SUNLIGHT = 200;
+	
+	private static final int HISTORY_LENGTH = 1000;
+	private static final int CONTROL_SPACING = 10;
+	
 	private final AppRoot ROOT;
 
 	private BarChart<String, Number> sizeHistogram;
@@ -59,16 +62,41 @@ public class Environment extends VBox {
 	}
 	
 	private void initControls() {
-		Button testButton = new Button();
-		testButton.setText("step");
-		testButton.setOnAction(new EventHandler<ActionEvent>() {
+		HBox stepControls = new HBox();
+		Button step1 = new Button();
+		Button step10 = new Button();
+		Button step100 = new Button();
+		
+		controls.setSpacing(CONTROL_SPACING);
+		
+		step1.setText("Step 1");
+		step1.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+               Environment.this.simulateCreatures(1);
+            }
+        });
+
+		step10.setText("Step 10");
+		step10.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+               Environment.this.simulateCreatures(10);
+            }
+        });
+
+		step100.setText("Step 100");
+		step100.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                Environment.this.simulateCreatures(100);
-                System.out.println("step");
             }
         });
-		controls.getChildren().add(testButton);
+		
+		stepControls.getChildren().add(step1);
+		stepControls.getChildren().add(step10);
+		stepControls.getChildren().add(step100);
+		controls.getChildren().add(stepControls);
 	}
 
 	private void initGrid(int width, int height, AppRoot root) {
