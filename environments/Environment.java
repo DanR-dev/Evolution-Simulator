@@ -7,6 +7,8 @@ import creatures.Creature;
 import creatures.Plant;
 import frontEnd.AppRoot;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
@@ -14,10 +16,13 @@ import javafx.scene.chart.Chart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart.Series;
+import javafx.scene.control.Button;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
-public class Environment extends GridPane {
+public class Environment extends VBox {
 	private static final int HISTORY_LENGTH = 1000;
 	private final static float SUNLIGHT = 200;
 	private final AppRoot ROOT;
@@ -25,47 +30,72 @@ public class Environment extends GridPane {
 	private BarChart<String, Number> sizeHistogram;
 	private LineChart<Number, Number> biomassGraph;
 
+	private HBox controls;
+	private GridPane simArea;
 	private EnvironmentTile[][] tiles;
 
 	public Environment(int width, int height, AppRoot root) {
 		super();
 		this.ROOT = root;
-		init(width, height, root);
-		refresh();
+		initGrid(width, height, root);
+		refresh(0);
 	}
 
 	public Environment(int width, int height, int nClusters, int clusterSize, int clusterWidth, AppRoot root) {
 		super();
+
+		controls = new HBox();
+		simArea = new GridPane();
+		
+		this.getChildren().add(controls);
+		this.getChildren().add(simArea);
+
+		this.ROOT = root;
+		initControls();
+		initGrid(width, height, root);
+		initCreatures(nClusters, clusterSize, clusterWidth);
+
+		refresh(0);
+	}
+	
+	private void initControls() {
+		Button testButton = new Button();
+		testButton.setText("step");
+		testButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+               Environment.this.simulateCreatures(100);
+                System.out.println("step");
+            }
+        });
+		controls.getChildren().add(testButton);
+	}
+
+	private void initGrid(int width, int height, AppRoot root) {
+		tiles = new EnvironmentTile[width][height];
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
+				tiles[i][j] = new EnvironmentTile(i, j, root);
+				simArea.add(tiles[i][j], i, j);
+			}
+		}
+		simArea.setGridLinesVisible(true);
+	}
+
+	private void initCreatures(int nClusters, int clusterSize, int clusterWidth) {
 		Random rng = new Random();
 		int clusterX;
 		int clusterY;
 		Creature[] clusterCreatures;
-
-		this.ROOT = root;
-		init(width, height, root);
-
 		for (int i = 0; i < nClusters; i++) {
 			clusterX = rng.nextInt(tiles.length);
 			clusterY = rng.nextInt(tiles[0].length);
 			clusterCreatures = new Creature[clusterSize];
 			for (int j = 0; j < clusterSize; j++) {
-				clusterCreatures[j] = Plant.randomPlant(root);
+				clusterCreatures[j] = Plant.randomPlant(ROOT);
 			}
 			scatter(tiles[clusterX][clusterY], clusterWidth, clusterCreatures);
 		}
-
-		refresh();
-	}
-
-	private void init(int width, int height, AppRoot root) {
-		tiles = new EnvironmentTile[width][height];
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {
-				tiles[i][j] = new EnvironmentTile(i, j, root);
-				add(tiles[i][j], i, j);
-			}
-		}
-		this.setGridLinesVisible(true);
 	}
 
 	private Chart sizeHistogram() {
@@ -120,28 +150,27 @@ public class Environment extends GridPane {
 		return biomassGraph;
 	}
 
-	private void refreshBiomassGraph() {
+	private void refreshBiomassGraph(int step) {
 		if (biomassGraph != null) {
-			Series<Number, Number> series;
-			ObservableList<Data<Number, Number>> data;
+			Series<Number, Number> series =biomassGraph.getData().get(0);
+			ObservableList<Data<Number, Number>> data = series.getData();
 			Creature[] creatures = getCreatures();
 			int totalMass = 0;
-
-			series = biomassGraph.getData().get(0);
-			data = series.getData();
+			int nextTime;
+			
+			for(int i = 0; i < data.size(); i++) {
+				nextTime = (int) data.get(i).getXValue() - step;
+				if(nextTime > -HISTORY_LENGTH) {
+					data.get(i).setXValue(nextTime);
+				} else {
+					data.remove(i);
+				}
+			}
 
 			for (Creature creature : creatures) {
 				totalMass += creature.getSize();
 			}
 			data.add(new Data<Number, Number>(0, totalMass));
-			
-			if(data.size() > HISTORY_LENGTH) {
-				data.remove(0);
-			}
-			
-			for(int i = 0; i < data.size(); i++) {
-				data.get(i).setXValue(i - data.size() + 1);
-			}
 		}
 	}
 
@@ -195,16 +224,18 @@ public class Environment extends GridPane {
 		}
 	}
 
-	public void simulateCreatures() {
-		for (int i = 0; i < tiles.length; i++) {
-			for (int j = 0; j < tiles[0].length; j++) {
-				getTile(i, j).simulateCreatures(this, SUNLIGHT);
+	public void simulateCreatures(int step) {
+		for(int i = 0; i < step; i++) {
+			for (int j = 0; j < tiles.length; j++) {
+				for (int k = 0; k < tiles[0].length; k++) {
+					getTile(j, k).simulateCreatures(this, SUNLIGHT);
+				}
 			}
 		}
-		refresh();
+		refresh(step);
 	}
 
-	public void refresh() {
+	public void refresh(int step) {
 		for (int i = 0; i < tiles.length; i++) {
 			for (int j = 0; j < tiles[0].length; j++) {
 				tiles[i][j].refresh();
@@ -212,11 +243,7 @@ public class Environment extends GridPane {
 		}
 
 		refreshSizeHistogram();
-		refreshBiomassGraph();
-	}
-
-	public void timeStep() {
-		simulateCreatures();
+		refreshBiomassGraph(step);
 	}
 
 	/**

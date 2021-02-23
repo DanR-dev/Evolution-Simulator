@@ -125,7 +125,7 @@ public abstract class Creature extends Circle implements Comparable<Creature> {
 		this.size = size;
 		energy = size * ENERGY_PER_SIZE * STARTING_ENERGY;
 		age = 0;
-		posOnTile = Pos.values()[rng.nextInt(Pos.values().length)];
+		posOnTile = Pos.values()[rng.nextInt(9)]; //first 9 Pos values are in square, last 3 are outside square
 
 		setFill(getCreatureColor());
 		setStrokeWidth(2);

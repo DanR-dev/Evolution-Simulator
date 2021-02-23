@@ -24,25 +24,11 @@ public class SimWindow extends Stage {
 		environmentGrid.setHgap(ENVIRONMENT_SPACING);
 		environmentGrid.setVgap(ENVIRONMENT_SPACING);
 		
-		environments.add(new Environment(envWidth, envHeight, 1, 1, 0, root));
+		environments.add(new Environment(envWidth, envHeight, 1, 40, 0, root));
 		//environments.add(new Environment(envWidth, envHeight, 1, 20, 0, root));
 
 		environmentGrid.add(environments.get(0), 0, 0);
 		//environmentGrid.add(environments.get(1), 1, 0);
-
-		
-		Button testButton = new Button();
-		testButton.setText("step");
-		testButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-            	for(int i = 0; i < 10; i++) {
-                    environments.get(0).simulateCreatures();
-            	}
-                System.out.println("step");
-            }
-        });
-		environmentGrid.add(testButton, 0, 0);
 
 		root.statWindow(environments.get(0));
 		
