@@ -2,10 +2,12 @@ package environments;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Timer;
 
 import creatures.Creature;
 import creatures.Plant;
 import frontEnd.AppRoot;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -23,10 +25,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class Environment extends VBox {
-	private final static float SUNLIGHT = 200;
+	private static final Timer TIMER = new Timer();
+	
+	private static final float SUNLIGHT = 200;
 	
 	private static final int HISTORY_LENGTH = 1000;
 	private static final int CONTROL_SPACING = 10;
+	
+	private static final int FRAME_TIME = 1000;
 	
 	private final AppRoot ROOT;
 
@@ -36,6 +42,10 @@ public class Environment extends VBox {
 	private HBox controls;
 	private GridPane simArea;
 	private EnvironmentTile[][] tiles;
+	
+	private SimTimer simTimer = new SimTimer(this);
+	
+	private int simSpeed = 0;
 
 	public Environment(int width, int height, AppRoot root) {
 		super();
@@ -66,6 +76,13 @@ public class Environment extends VBox {
 		Button step1 = new Button();
 		Button step10 = new Button();
 		Button step100 = new Button();
+		Button step1000 = new Button();
+		HBox timeControls = new HBox();
+		Button timeStop = new Button();
+		Button time1 = new Button();
+		Button time10 = new Button();
+		Button time100 = new Button();
+		Button time1000 = new Button();
 		
 		controls.setSpacing(CONTROL_SPACING);
 		
@@ -73,7 +90,7 @@ public class Environment extends VBox {
 		step1.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-               Environment.this.simulateCreatures(1);
+               Environment.this.simulateSingle(1);
             }
         });
 
@@ -81,7 +98,7 @@ public class Environment extends VBox {
 		step10.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-               Environment.this.simulateCreatures(10);
+               Environment.this.simulateSingle(10);
             }
         });
 
@@ -89,14 +106,89 @@ public class Environment extends VBox {
 		step100.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-               Environment.this.simulateCreatures(100);
+               Environment.this.simulateSingle(100);
+            }
+        });
+
+		step1000.setText("Step 1000");
+		step1000.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+               Environment.this.simulateSingle(1000);
+            }
+        });
+		
+		timeStop.setText("Sim Stop");
+		timeStop.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+               Environment.this.simSpeed = 0;
+            }
+        });
+		
+		time1.setText("Sim Speed x1");
+		time1.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+            	if(Environment.this.simSpeed == 0) {
+                    Environment.this.simSpeed = 1;
+            		simulateContinuous();
+            	} else {
+                    Environment.this.simSpeed = 1;
+            	}
+            }
+        });
+
+		time10.setText("Sim Speed x10");
+		time10.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+            	if(Environment.this.simSpeed == 0) {
+                    Environment.this.simSpeed = 10;
+            		simulateContinuous();
+            	} else {
+                    Environment.this.simSpeed = 10;
+            	}
+            }
+        });
+
+		time100.setText("Sim Speed x100");
+		time100.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+            	if(Environment.this.simSpeed == 0) {
+                    Environment.this.simSpeed = 100;
+            		simulateContinuous();
+            	} else {
+                    Environment.this.simSpeed = 100;
+            	}
+            }
+        });
+
+		time1000.setText("Sim Speed x1000");
+		time1000.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+            	if(Environment.this.simSpeed == 0) {
+                    Environment.this.simSpeed = 1000;
+            		simulateContinuous();
+            	} else {
+                    Environment.this.simSpeed = 1000;
+            	}
             }
         });
 		
 		stepControls.getChildren().add(step1);
 		stepControls.getChildren().add(step10);
 		stepControls.getChildren().add(step100);
+		stepControls.getChildren().add(step1000);
+		timeControls.getChildren().add(timeStop);
+		timeControls.getChildren().add(time1);
+		timeControls.getChildren().add(time10);
+		timeControls.getChildren().add(time100);
+		timeControls.getChildren().add(time1000);
 		controls.getChildren().add(stepControls);
+		controls.getChildren().add(timeControls);
 	}
 
 	private void initGrid(int width, int height, AppRoot root) {
@@ -252,7 +344,7 @@ public class Environment extends VBox {
 		}
 	}
 
-	public void simulateCreatures(int step) {
+	public void simulateSingle(int step) {
 		for(int i = 0; i < step; i++) {
 			for (int j = 0; j < tiles.length; j++) {
 				for (int k = 0; k < tiles[0].length; k++) {
@@ -261,6 +353,14 @@ public class Environment extends VBox {
 			}
 		}
 		refresh(step);
+	}
+
+	public void simulateContinuous() {
+		if(simSpeed > 0) {
+			Platform.runLater(() -> simulateSingle(simSpeed));
+			simTimer = new SimTimer(this);
+			TIMER.schedule(simTimer, FRAME_TIME);
+		}
 	}
 
 	public void refresh(int step) {
