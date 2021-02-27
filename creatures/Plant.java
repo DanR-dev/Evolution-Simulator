@@ -16,19 +16,18 @@ public class Plant extends Creature {
 	protected static final float SUSTAIN_EFFICIENCY = 0.5F;
 	protected static final float CLONE_EFFICIENCY = 0.5F;
 	protected static final float PHOTO_EFFICIENCY = 0.5F;
-	protected static final float GROW_EFFICIENCY = 0.5F;
+	protected static final float GROW_EFFICIENCY = 0.2F;
 	protected static final float SEED_EFFICIENCY = 0.5F;
 	protected static final int MAX_STARTING_SIZE = 5;
 	protected static final int MAX_SEED_RANGE = 10;
-	protected static final int MAX_GROW_BATCH = 1;
-	protected static final int MAX_SEED_BATCH = 1;
 	protected static final int MAX_SIZE = 100;
 
 	public static Plant randomPlant(AppRoot root) {
 		Random rng = new Random();
 		DecimalFormat df = new DecimalFormat("#.#");
 		Plant plant;
-
+		int tries = 0;
+		
 		do {
 			plant = new Plant(rng.nextInt(MAX_MUTATION) + 1, // mutation rate
 					Float.parseFloat(df.format(rng.nextFloat())), // reproduce behaviour
@@ -36,22 +35,19 @@ public class Plant extends Creature {
 					(rng.nextInt(10) + 1) * 100, // age cap
 					rng.nextInt(MAX_SIZE) + 1, // size cap
 					rng.nextInt(MAX_STARTING_SIZE) + 1, // starting size
-					rng.nextInt(MAX_GROW_BATCH) + 1, // growth rate
-					rng.nextInt(MAX_SEED_BATCH) + 1, // seed batch size
 					rng.nextInt(MAX_SEED_RANGE) + 1, // seed spreading range
 					root);
-		} while (plant.isGeneticDeadEnd());
+			tries++;
+		} while (plant.isGeneticDeadEnd() && tries  < 100);
 		return plant;
 	}
 
 	public Plant(int mutationRate, float reproduceBehaviour, float growBehaviour, int ageCap, int sizeCap,
-			int startingSize, int growBatch, int seedBatch, int seedRange, AppRoot root) {
+			int startingSize, int seedRange, AppRoot root) {
 		super(mutationRate, reproduceBehaviour, growBehaviour, ageCap, startingSize, root);
 
 		GENOME.addGene(GeneType.SIZE_CAP, new Gene(1, MAX_SIZE, 1, sizeCap));
 		GENOME.addGene(GeneType.STARTING_SIZE, new Gene(1, MAX_STARTING_SIZE, 1, startingSize));
-		GENOME.addGene(GeneType.GROW_BATCH, new Gene(1, MAX_GROW_BATCH, 1, growBatch));
-		GENOME.addGene(GeneType.SEED_BATCH, new Gene(1, MAX_SEED_BATCH, 1, seedBatch));
 		GENOME.addGene(GeneType.SEED_RANGE, new Gene(1, MAX_SEED_RANGE, 1, seedRange));
 	}
 
@@ -67,14 +63,11 @@ public class Plant extends Creature {
 		return result;
 	}
 
-	public Plant[] reproduce() {
-		Plant[] children = new Plant[(int) GENOME.getGeneValue(GeneType.SEED_BATCH)];
-		for (int i = 0; i < children.length; i++) {
-			children[i] = new Plant(GENOME, ROOT);
-			children[i].GENOME.mutate();
-		}
+	public Plant reproduce() {
+		Plant child = new Plant(GENOME, ROOT);
+		child.GENOME.mutate();
 		this.energy -= reproduceCost();
-		return children;
+		return child;
 	}
 
 	public Color getCreatureColor() {
@@ -95,11 +88,11 @@ public class Plant extends Creature {
 		float singleCloneCost = GENOME.getGeneValue(GeneType.STARTING_SIZE) * ENERGY_PER_SIZE / CLONE_EFFICIENCY;
 		float singleSpreadCost = GENOME.getGeneValue(GeneType.STARTING_SIZE) * GENOME.getGeneValue(GeneType.SEED_RANGE)
 				* GENOME.getGeneValue(GeneType.SEED_RANGE) / SEED_EFFICIENCY;
-		return GENOME.getGeneValue(GeneType.SEED_BATCH) * (singleCloneCost + singleSpreadCost);
+		return (singleCloneCost + singleSpreadCost);
 	}
 
 	public float growCost() {
-		return GENOME.getGeneValue(GeneType.GROW_BATCH) * ENERGY_PER_SIZE / GROW_EFFICIENCY;
+		return (size / MAX_SIZE) * ENERGY_PER_SIZE / GROW_EFFICIENCY;
 	}
 
 	public float sustainCost() {
@@ -154,7 +147,7 @@ public class Plant extends Creature {
 	}
 
 	public void grow() {
-		size += GENOME.getGeneValue(GeneType.GROW_BATCH);
+		size += 1;
 		energy -= growCost();
 	}
 

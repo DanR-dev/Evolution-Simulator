@@ -17,7 +17,8 @@ public class StatWindow extends Stage {
 		}
 		statGrid.getChildren().add(0, stats[0]);
 		statGrid.getChildren().add(1, stats[1]);
-		
+		statGrid.getChildren().add(2, stats[2]);
+
 		setScene(scene);
 		setTitle("Statistics");
 	}

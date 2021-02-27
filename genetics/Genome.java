@@ -61,6 +61,14 @@ public class Genome implements Cloneable {
 	public Gene getGene(GeneType type) {
 		return genes.get(type.ordinal());
 	}
+	
+	public float[] getMagnitudes() {
+		float[] magnitudes = new float[GeneType.values().length];
+		for(int i = 0; i < GeneType.values().length; i++) {
+			magnitudes[i] = getGene(GeneType.values()[i]).getMagnitude();
+		}
+		return magnitudes;
+	}
 
 	public float getGeneValue(GeneType type) {
 		return genes.get(type.ordinal()).getValue();

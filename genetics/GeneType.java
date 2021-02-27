@@ -12,7 +12,5 @@ public enum GeneType {
 	STARTING_SIZE,
 	
 	//plant genes, required
-	GROW_BATCH,
-	SEED_BATCH,
 	SEED_RANGE,
 }

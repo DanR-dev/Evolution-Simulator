@@ -7,6 +7,7 @@ import java.util.Timer;
 import creatures.Creature;
 import creatures.Plant;
 import frontEnd.AppRoot;
+import genetics.GeneType;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -26,25 +27,26 @@ import javafx.scene.layout.VBox;
 
 public class Environment extends VBox {
 	private static final Timer TIMER = new Timer();
-	
+
 	private static final float SUNLIGHT = 200;
-	
+
 	private static final int HISTORY_LENGTH = 1000;
 	private static final int CONTROL_SPACING = 10;
-	
+
 	private static final int FRAME_TIME = 1000;
-	
+
 	private final AppRoot ROOT;
 
 	private BarChart<String, Number> sizeHistogram;
 	private LineChart<Number, Number> biomassGraph;
+	private LineChart<Number, Number> geneGraph;
 
 	private HBox controls;
 	private GridPane simArea;
 	private EnvironmentTile[][] tiles;
-	
+
 	private SimTimer simTimer = new SimTimer(this);
-	
+
 	private int simSpeed = 0;
 
 	public Environment(int width, int height, AppRoot root) {
@@ -59,7 +61,7 @@ public class Environment extends VBox {
 
 		controls = new HBox();
 		simArea = new GridPane();
-		
+
 		this.getChildren().add(controls);
 		this.getChildren().add(simArea);
 
@@ -70,7 +72,7 @@ public class Environment extends VBox {
 
 		refresh(0);
 	}
-	
+
 	private void initControls() {
 		HBox stepControls = new HBox();
 		Button step1 = new Button();
@@ -83,101 +85,101 @@ public class Environment extends VBox {
 		Button time10 = new Button();
 		Button time100 = new Button();
 		Button time1000 = new Button();
-		
+
 		controls.setSpacing(CONTROL_SPACING);
-		
+
 		step1.setText("Step 1");
 		step1.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-               Environment.this.simulateSingle(1);
-            }
-        });
+			@Override
+			public void handle(ActionEvent event) {
+				Environment.this.simulateSingle(1);
+			}
+		});
 
 		step10.setText("Step 10");
 		step10.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-               Environment.this.simulateSingle(10);
-            }
-        });
+			@Override
+			public void handle(ActionEvent event) {
+				Environment.this.simulateSingle(10);
+			}
+		});
 
 		step100.setText("Step 100");
 		step100.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-               Environment.this.simulateSingle(100);
-            }
-        });
+			@Override
+			public void handle(ActionEvent event) {
+				Environment.this.simulateSingle(100);
+			}
+		});
 
 		step1000.setText("Step 1000");
 		step1000.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-               Environment.this.simulateSingle(1000);
-            }
-        });
-		
+			@Override
+			public void handle(ActionEvent event) {
+				Environment.this.simulateSingle(1000);
+			}
+		});
+
 		timeStop.setText("Sim Stop");
 		timeStop.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-               Environment.this.simSpeed = 0;
-            }
-        });
-		
+			@Override
+			public void handle(ActionEvent event) {
+				Environment.this.simSpeed = 0;
+			}
+		});
+
 		time1.setText("Sim Speed x1");
 		time1.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-            	if(Environment.this.simSpeed == 0) {
-                    Environment.this.simSpeed = 1;
-            		simulateContinuous();
-            	} else {
-                    Environment.this.simSpeed = 1;
-            	}
-            }
-        });
+			@Override
+			public void handle(ActionEvent event) {
+				if (Environment.this.simSpeed == 0) {
+					Environment.this.simSpeed = 1;
+					simulateContinuous();
+				} else {
+					Environment.this.simSpeed = 1;
+				}
+			}
+		});
 
 		time10.setText("Sim Speed x10");
 		time10.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-            	if(Environment.this.simSpeed == 0) {
-                    Environment.this.simSpeed = 10;
-            		simulateContinuous();
-            	} else {
-                    Environment.this.simSpeed = 10;
-            	}
-            }
-        });
+			@Override
+			public void handle(ActionEvent event) {
+				if (Environment.this.simSpeed == 0) {
+					Environment.this.simSpeed = 10;
+					simulateContinuous();
+				} else {
+					Environment.this.simSpeed = 10;
+				}
+			}
+		});
 
 		time100.setText("Sim Speed x100");
 		time100.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-            	if(Environment.this.simSpeed == 0) {
-                    Environment.this.simSpeed = 100;
-            		simulateContinuous();
-            	} else {
-                    Environment.this.simSpeed = 100;
-            	}
-            }
-        });
+			@Override
+			public void handle(ActionEvent event) {
+				if (Environment.this.simSpeed == 0) {
+					Environment.this.simSpeed = 100;
+					simulateContinuous();
+				} else {
+					Environment.this.simSpeed = 100;
+				}
+			}
+		});
 
 		time1000.setText("Sim Speed x1000");
 		time1000.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-            	if(Environment.this.simSpeed == 0) {
-                    Environment.this.simSpeed = 1000;
-            		simulateContinuous();
-            	} else {
-                    Environment.this.simSpeed = 1000;
-            	}
-            }
-        });
-		
+			@Override
+			public void handle(ActionEvent event) {
+				if (Environment.this.simSpeed == 0) {
+					Environment.this.simSpeed = 1000;
+					simulateContinuous();
+				} else {
+					Environment.this.simSpeed = 1000;
+				}
+			}
+		});
+
 		stepControls.getChildren().add(step1);
 		stepControls.getChildren().add(step10);
 		stepControls.getChildren().add(step100);
@@ -214,7 +216,7 @@ public class Environment extends VBox {
 			for (int j = 0; j < clusterSize; j++) {
 				clusterCreatures[j] = Plant.randomPlant(ROOT);
 			}
-			scatter(tiles[clusterX][clusterY], clusterWidth, clusterCreatures);
+			scatterAll(tiles[clusterX][clusterY], clusterWidth, clusterCreatures);
 		}
 	}
 
@@ -227,7 +229,9 @@ public class Environment extends VBox {
 		yAxis.setLabel("Number");
 		sizeHistogram = new BarChart<String, Number>(xAxis, yAxis);
 		sizeHistogram.setTitle("Creature size");
+		series.setName("Size");
 		sizeHistogram.getData().add(series);
+
 		refreshSizeHistogram();
 		return sizeHistogram;
 	}
@@ -264,23 +268,24 @@ public class Environment extends VBox {
 		yAxis.setLabel("Total Biomass");
 		biomassGraph = new LineChart<Number, Number>(xAxis, yAxis);
 		biomassGraph.setTitle("Biomass Over Time");
-		
+		series.setName("Total Biomass");
+
 		biomassGraph.getData().add(series);
-		refreshSizeHistogram();
+		refreshBiomassGraph(0);
 		return biomassGraph;
 	}
 
 	private void refreshBiomassGraph(int step) {
 		if (biomassGraph != null) {
-			Series<Number, Number> series =biomassGraph.getData().get(0);
+			Series<Number, Number> series = biomassGraph.getData().get(0);
 			ObservableList<Data<Number, Number>> data = series.getData();
 			Creature[] creatures = getCreatures();
 			int totalMass = 0;
 			int nextTime;
-			
-			for(int i = 0; i < data.size(); i++) {
+
+			for (int i = 0; i < data.size(); i++) {
 				nextTime = (int) data.get(i).getXValue() - step;
-				if(nextTime > -HISTORY_LENGTH) {
+				if (nextTime > -HISTORY_LENGTH) {
 					data.get(i).setXValue(nextTime);
 				} else {
 					data.remove(i);
@@ -294,11 +299,68 @@ public class Environment extends VBox {
 		}
 	}
 
+	private Chart geneGraph() {
+		NumberAxis xAxis = new NumberAxis();
+		NumberAxis yAxis = new NumberAxis();
+		Series<Number, Number>[] seriesSet = new Series[GeneType.values().length];
+
+		for (int i = 0; i < seriesSet.length; i++) {
+			seriesSet[i] = new Series<Number, Number>();
+			seriesSet[i].setName(GeneType.values()[i].toString());
+		}
+
+		xAxis.setLabel("Time");
+		yAxis.setLabel("Gene Values (proportional)");
+		geneGraph = new LineChart<Number, Number>(xAxis, yAxis);
+		geneGraph.setTitle("Gene Values Over Time");
+
+		geneGraph.getData().addAll(seriesSet);
+		refreshGeneGraph(0);
+		return geneGraph;
+	}
+
+	private void refreshGeneGraph(int step) {
+		if (biomassGraph != null) {
+			Creature[] creatures = getCreatures();
+			Series<Number, Number> currentSeries;
+			ObservableList<Data<Number, Number>> currentData;
+			int nextDatapointTime;
+			float[] averageGeneMags = new float[GeneType.values().length];
+			float[] currentGeneMags;
+
+			for (Creature creature : creatures) {
+				currentGeneMags = creature.getGeneMagnitudes();
+				for (int i = 0; i < GeneType.values().length; i++) {
+					averageGeneMags[i] += currentGeneMags[i];
+				}
+			}
+			for (int i = 0; i < GeneType.values().length; i++) {
+				averageGeneMags[i] = averageGeneMags[i] / creatures.length;
+			}
+
+			for (GeneType type : GeneType.values()) {
+				currentSeries = geneGraph.getData().get(type.ordinal());
+				currentData = currentSeries.getData();
+
+				for (int i = 0; i < currentData.size(); i++) {
+					nextDatapointTime = (int) currentData.get(i).getXValue() - step;
+					if (nextDatapointTime > -HISTORY_LENGTH) {
+						currentData.get(i).setXValue(nextDatapointTime);
+					} else {
+						currentData.remove(i);
+					}
+				}
+				currentData.add(new Data<Number, Number>(0, averageGeneMags[type.ordinal()]));
+			}
+		}
+	}
+
 	public Chart[] getCharts() {
-		Chart[] charts = new Chart[2];
+		Chart[] charts = new Chart[3];
 
 		charts[0] = sizeHistogram();
 		charts[1] = biomassGraph();
+		charts[2] = geneGraph();
 
 		return charts;
 	}
@@ -335,17 +397,21 @@ public class Environment extends VBox {
 		return tiles[trueX][trueY];
 	}
 
-	public void scatter(EnvironmentTile tile, int dist, Creature[] creatures) {
-		Random rng = new Random();
-
+	public void scatterAll(EnvironmentTile tile, int dist, Creature[] creatures) {
 		for (Creature creature : creatures) {
-			getTile(tile.getX() + rng.nextInt(dist * 2 + 1) - dist, tile.getY() + rng.nextInt(dist * 2 + 1) - dist)
-					.addCreature(creature);
+			scatter(tile, dist, creature);
 		}
 	}
 
+	public void scatter(EnvironmentTile tile, int dist, Creature creature) {
+		Random rng = new Random();
+
+		getTile(tile.getX() + rng.nextInt(dist * 2 + 1) - dist, tile.getY() + rng.nextInt(dist * 2 + 1) - dist)
+				.addCreature(creature);
+	}
+
 	public void simulateSingle(int step) {
-		for(int i = 0; i < step; i++) {
+		for (int i = 0; i < step; i++) {
 			for (int j = 0; j < tiles.length; j++) {
 				for (int k = 0; k < tiles[0].length; k++) {
 					getTile(j, k).simulateCreatures(this, SUNLIGHT);
@@ -356,7 +422,7 @@ public class Environment extends VBox {
 	}
 
 	public void simulateContinuous() {
-		if(simSpeed > 0) {
+		if (simSpeed > 0) {
 			Platform.runLater(() -> simulateSingle(simSpeed));
 			simTimer = new SimTimer(this);
 			TIMER.schedule(simTimer, FRAME_TIME);
@@ -372,6 +438,7 @@ public class Environment extends VBox {
 
 		refreshSizeHistogram();
 		refreshBiomassGraph(step);
+		refreshGeneGraph(step);
 	}
 
 	/**

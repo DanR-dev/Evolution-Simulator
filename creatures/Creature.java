@@ -45,7 +45,7 @@ public abstract class Creature extends Circle implements Comparable<Creature> {
 
 	public abstract Color getCreatureColor();
 
-	public abstract Creature[] reproduce();
+	public abstract Creature reproduce();
 
 	public abstract boolean survive();
 
@@ -75,6 +75,10 @@ public abstract class Creature extends Circle implements Comparable<Creature> {
 		box.getChildren().add(genetics);
 
 		return box;
+	}
+	
+	public float[] getGeneMagnitudes() {
+		return GENOME.getMagnitudes();
 	}
 
 	public void refreshOutput() {

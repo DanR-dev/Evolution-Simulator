@@ -11,7 +11,6 @@ public class AppRoot extends Application {
 	public void start(Stage stage) throws Exception {
 		stage = new SimWindow(15, 7, this);
 		stage.show();
-		
 	}
 	
 	public CreatureWindow creatureWindow(Creature creature) {
