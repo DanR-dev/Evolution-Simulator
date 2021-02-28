@@ -3,9 +3,9 @@ package genetics;
 import java.util.Random;
 
 public class Gene implements Cloneable {
-	private final float INCREMENTS;
-	private final float MIN_VALUE;
-	private final float MAX_VALUE;
+	public final float INCREMENTS;
+	public final float MIN_VALUE;
+	public final float MAX_VALUE;
 	private float value;
 	
 	public Gene(float minValue, float maxValue, float increments, float value) {

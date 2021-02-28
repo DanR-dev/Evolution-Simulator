@@ -40,6 +40,7 @@ public class Environment extends VBox {
 	private BarChart<String, Number> sizeHistogram;
 	private LineChart<Number, Number> biomassGraph;
 	private LineChart<Number, Number> geneGraph;
+	private BarChart<String, Number>[] geneHistograms = new BarChart[GeneType.values().length];
 
 	private HBox controls;
 	private GridPane simArea;
@@ -355,7 +356,56 @@ public class Environment extends VBox {
 		}
 	}
 
-	public Chart[] getCharts() {
+	private Chart[] geneHistograms() {
+		CategoryAxis xAxis[] = new CategoryAxis[GeneType.values().length];
+		NumberAxis yAxis[] = new NumberAxis[GeneType.values().length];
+		Series<String, Number> series[] = new Series[GeneType.values().length];
+
+		for (int i = 0; i < GeneType.values().length; i++) {
+			xAxis[i] = new CategoryAxis();
+			yAxis[i] = new NumberAxis();
+			xAxis[i].setLabel("Gene Value");
+			yAxis[i].setLabel("Number");
+
+			geneHistograms[i] = new BarChart<String, Number>(xAxis[i], yAxis[i]);
+			geneHistograms[i].setTitle("Distribution of " + GeneType.values()[i].toString());
+
+			series[i] = new Series<String, Number>();
+			series[i].setName(GeneType.values()[i].toString());
+			geneHistograms[i].getData().add(series[i]);
+		}
+
+		refreshGeneHistograms();
+		return geneHistograms;
+	}
+
+	private void refreshGeneHistograms() {
+		Creature[] creatures = getCreatures();
+
+		for (int i = 0; i < GeneType.values().length; i++) {
+			if (geneHistograms[i] != null) {
+				Series<String, Number> series = geneHistograms[i].getData().get(0);
+				ObservableList<Data<String, Number>> data = series.getData();
+				int numMag;
+
+				if(creatures.length != 0) {
+					for (float j = creatures[0].GENOME.getGene(GeneType.values()[i]).MIN_VALUE; 
+							j <= creatures[0].GENOME.getGene(GeneType.values()[i]).MAX_VALUE; 
+							j += creatures[0].GENOME.getGene(GeneType.values()[i]).INCREMENTS) {
+						numMag = 0;
+						for (Creature creature : creatures) {
+							if (creature.GENOME.getGene(GeneType.values()[i]).getValue() == j) {
+								numMag++;
+							}
+						}
+						data.add(new Data<String, Number>("" + j, numMag));
+					}
+				}
+			}
+		}
+	}
+
+	public Chart[] getBasicCharts() {
 		Chart[] charts = new Chart[3];
 
 		charts[0] = sizeHistogram();
@@ -363,6 +413,10 @@ public class Environment extends VBox {
 		charts[2] = geneGraph();
 
 		return charts;
+	}
+	
+	public Chart[] getGeneHistograms() {
+		return geneHistograms();
 	}
 
 	public Creature[] getCreatures() {
@@ -439,6 +493,7 @@ public class Environment extends VBox {
 		refreshSizeHistogram();
 		refreshBiomassGraph(step);
 		refreshGeneGraph(step);
+		refreshGeneHistograms();
 	}
 
 	/**

@@ -30,8 +30,8 @@ public abstract class Creature extends Circle implements Comparable<Creature> {
 	public static final int MAX_MUTATION = 10;
 	public static final int MAX_SIZE = 100;
 
-	protected final Genome GENOME;
-	protected final AppRoot ROOT;
+	public final Genome GENOME;
+	public final AppRoot ROOT;
 
 	protected Pos posOnTile;
 	protected float energy;

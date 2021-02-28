@@ -16,7 +16,7 @@ public class Plant extends Creature {
 	protected static final float SUSTAIN_EFFICIENCY = 0.5F;
 	protected static final float CLONE_EFFICIENCY = 0.5F;
 	protected static final float PHOTO_EFFICIENCY = 0.5F;
-	protected static final float GROW_EFFICIENCY = 0.2F;
+	protected static final float GROW_EFFICIENCY = 0.5F;
 	protected static final float SEED_EFFICIENCY = 0.5F;
 	protected static final int MAX_STARTING_SIZE = 5;
 	protected static final int MAX_SEED_RANGE = 10;
@@ -75,7 +75,7 @@ public class Plant extends Creature {
 	}
 
 	public float photosynthesise(float availableEnergy) {
-		float absorbed = availableEnergy * PHOTO_EFFICIENCY * (MAX_SIZE / size);
+		float absorbed = availableEnergy * PHOTO_EFFICIENCY * (1 + size / MAX_SIZE);
 		energy += absorbed;
 
 		if (energy > size * ENERGY_PER_SIZE) {
@@ -92,7 +92,7 @@ public class Plant extends Creature {
 	}
 
 	public float growCost() {
-		return (size / MAX_SIZE) * ENERGY_PER_SIZE / GROW_EFFICIENCY;
+		return (1 + size / MAX_SIZE) * ENERGY_PER_SIZE / GROW_EFFICIENCY;
 	}
 
 	public float sustainCost() {
