@@ -66,6 +66,10 @@ public class EnvironmentTile extends StackPane {
 			creatures.get(i).chooseBehaviour(environment, this);
 		}
 	}
+	
+	public void killCreatures() {
+		creatures.clear();
+	}
 
 	public void photosynthesise(float photoEnergy) {
 		Plant[] plants = getPlants();

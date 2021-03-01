@@ -34,5 +34,6 @@ public class StatWindow extends Stage {
 
 		setScene(scene);
 		setTitle("Statistics");
+		setWidth(1600);
 	}
 }

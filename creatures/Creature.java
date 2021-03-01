@@ -166,7 +166,7 @@ public abstract class Creature extends Circle implements Comparable<Creature> {
 
 	public void refresh() {
 		this.setRadius(Math.sqrt(size));
-		this.setStroke(Color.BLUE);
+		this.setStroke(Color.BLACK);
 
 		refreshOutput();
 	}
