@@ -13,11 +13,11 @@ import javafx.scene.paint.Color;
 
 public class Plant extends Creature {
 	protected static final Color PLANT_COLOR = Color.GREEN;
-	protected static final float SUSTAIN_EFFICIENCY = 0.5F;
-	protected static final float CLONE_EFFICIENCY = 0.5F;
-	protected static final float PHOTO_EFFICIENCY = 0.5F;
-	protected static final float GROW_EFFICIENCY = 0.5F;
-	protected static final float SEED_EFFICIENCY = 0.5F;
+	protected static final float SUSTAIN_EFFICIENCY = 0.2F;
+	protected static final float CLONE_EFFICIENCY = 20F;
+	protected static final float PHOTO_EFFICIENCY = 0.2F;
+	protected static final float GROW_EFFICIENCY = 200F;
+	protected static final float SEED_EFFICIENCY = 2F;
 	protected static final int MAX_STARTING_SIZE = 5;
 	protected static final int MAX_SEED_RANGE = 10;
 	protected static final int MAX_SIZE = 100;
@@ -75,7 +75,7 @@ public class Plant extends Creature {
 	}
 
 	public float photosynthesise(float availableEnergy) {
-		float absorbed = availableEnergy * PHOTO_EFFICIENCY * (1 + size / MAX_SIZE);
+		float absorbed = availableEnergy * PHOTO_EFFICIENCY * (size + MAX_SIZE) / (MAX_SIZE + MAX_SIZE);
 		energy += absorbed;
 
 		if (energy > size * ENERGY_PER_SIZE) {
@@ -85,14 +85,14 @@ public class Plant extends Creature {
 	}
 
 	public float reproduceCost() {
-		float singleCloneCost = GENOME.getGeneValue(GeneType.STARTING_SIZE) * ENERGY_PER_SIZE / CLONE_EFFICIENCY;
+		float singleCloneCost = GENOME.getGeneValue(GeneType.STARTING_SIZE) * ENERGY_PER_SIZE * CLONE_EFFICIENCY;
 		float singleSpreadCost = GENOME.getGeneValue(GeneType.STARTING_SIZE) * GENOME.getGeneValue(GeneType.SEED_RANGE)
-				* GENOME.getGeneValue(GeneType.SEED_RANGE) / SEED_EFFICIENCY;
+				* (1 + GENOME.getGeneValue(GeneType.SEED_RANGE) / MAX_SEED_RANGE) * SEED_EFFICIENCY;
 		return (singleCloneCost + singleSpreadCost);
 	}
 
 	public float growCost() {
-		return (1 + size / MAX_SIZE) * ENERGY_PER_SIZE / GROW_EFFICIENCY;
+		return (size / MAX_SIZE) * ENERGY_PER_SIZE / GROW_EFFICIENCY;
 	}
 
 	public float sustainCost() {

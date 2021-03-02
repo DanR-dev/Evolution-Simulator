@@ -9,7 +9,7 @@ public class AppRoot extends Application {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		stage = new SimWindow(20, 10, this);
+		stage = new SimWindow(22, 10, this);
 		stage.show();
 	}
 	

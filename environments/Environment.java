@@ -35,7 +35,7 @@ public class Environment extends VBox {
 	private static final int HISTORY_LENGTH = 1000;
 	private static final int CONTROL_SPACING = 10;
 	private static final int MIN_KILL_PERIOD = 1;
-	private static final int MAX_KILL_PERIOD = 1000;
+	private static final int MAX_KILL_PERIOD = 10000;
 	private static final int MIN_KILL_RADIUS = 0;
 	private static final int MAX_KILL_RADIUS = 10;
 
@@ -345,9 +345,10 @@ public class Environment extends VBox {
 
 			for (int i = 0; i < data.size(); i++) {
 				nextTime = (int) data.get(i).getXValue() - step;
-				if (nextTime > -HISTORY_LENGTH) {
+				if (nextTime >= -HISTORY_LENGTH) {
 					data.get(i).setXValue(nextTime);
 				} else {
+					data.get(i).setXValue(nextTime);
 					data.remove(i);
 				}
 			}
@@ -404,9 +405,10 @@ public class Environment extends VBox {
 
 				for (int i = 0; i < currentData.size(); i++) {
 					nextDatapointTime = (int) currentData.get(i).getXValue() - step;
-					if (nextDatapointTime > -HISTORY_LENGTH) {
+					if (nextDatapointTime >= -HISTORY_LENGTH) {
 						currentData.get(i).setXValue(nextDatapointTime);
 					} else {
+						currentData.get(i).setXValue(nextDatapointTime);
 						currentData.remove(i);
 					}
 				}
