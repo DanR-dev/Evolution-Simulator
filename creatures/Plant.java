@@ -86,8 +86,8 @@ public class Plant extends Creature {
 
 	public float reproduceCost() {
 		float singleCloneCost = GENOME.getGeneValue(GeneType.STARTING_SIZE) * ENERGY_PER_SIZE * CLONE_EFFICIENCY;
-		float singleSpreadCost = GENOME.getGeneValue(GeneType.STARTING_SIZE) * GENOME.getGeneValue(GeneType.SEED_RANGE)
-				* (1 + GENOME.getGeneValue(GeneType.SEED_RANGE) / MAX_SEED_RANGE) * SEED_EFFICIENCY;
+		float singleSpreadCost = (GENOME.getGeneValue(GeneType.STARTING_SIZE) * GENOME.getGeneValue(GeneType.SEED_RANGE)
+				* GENOME.getGeneValue(GeneType.SEED_RANGE) * SEED_EFFICIENCY) / MAX_SEED_RANGE;
 		return (singleCloneCost + singleSpreadCost);
 	}
 

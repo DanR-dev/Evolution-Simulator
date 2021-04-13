@@ -48,7 +48,7 @@ public class Genome implements Cloneable {
 		for(GeneType type : types) {
 			if(getGene(type) != null) {
 				geneOutputs[n] = new VBox();
-				geneOutputs[n].getChildren().add(new Label(type + ":"));
+				geneOutputs[n].getChildren().add(new Label(type.alias() + ":"));
 				geneOutputs[n].getChildren().add(new ProgressBar(getGene(type).getMagnitude()));
 				output.getChildren().add(geneOutputs[n]);
 				n++;

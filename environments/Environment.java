@@ -367,7 +367,7 @@ public class Environment extends VBox {
 
 		for (int i = 0; i < seriesSet.length; i++) {
 			seriesSet[i] = new Series<Number, Number>();
-			seriesSet[i].setName(GeneType.values()[i].toString());
+			seriesSet[i].setName(GeneType.values()[i].alias());
 		}
 
 		xAxis.setLabel("Time");
@@ -429,10 +429,10 @@ public class Environment extends VBox {
 			yAxis[i].setLabel("Number");
 
 			geneHistograms[i] = new BarChart<String, Number>(xAxis[i], yAxis[i]);
-			geneHistograms[i].setTitle("Distribution of " + GeneType.values()[i].toString());
+			geneHistograms[i].setTitle("Distribution of " + GeneType.values()[i].alias());
 
 			series[i] = new Series<String, Number>();
-			series[i].setName(GeneType.values()[i].toString());
+			series[i].setName(GeneType.values()[i].alias());
 			geneHistograms[i].getData().add(series[i]);
 		}
 
