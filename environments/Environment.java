@@ -32,7 +32,7 @@ public class Environment extends VBox {
 
 	private static final float SUNLIGHT = 200;
 
-	private static final int HISTORY_LENGTH = 1000;
+	private static final int HISTORY_LENGTH = 5000;
 	private static final int CONTROL_SPACING = 10;
 	private static final int MIN_KILL_PERIOD = 1;
 	private static final int MAX_KILL_PERIOD = 10000;

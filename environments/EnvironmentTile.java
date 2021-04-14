@@ -11,7 +11,6 @@ import javafx.scene.layout.StackPane;
 public class EnvironmentTile extends StackPane {
 	private static final int TILE_SIZE = 60;
 	private final AppRoot ROOT;
-	private ArrayList<EnvironmentalCondition> conditions = new ArrayList<EnvironmentalCondition>();
 	private ArrayList<Creature> creatures = new ArrayList<Creature>();
 	private int x;
 	private int y;
