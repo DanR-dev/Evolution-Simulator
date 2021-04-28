@@ -20,25 +20,26 @@ public class Plant extends Creature {
 	protected static final float SEED_EFFICIENCY = 2F;
 	protected static final int MAX_STARTING_SIZE = 5;
 	protected static final int MAX_SEED_RANGE = 10;
-	protected static final int MAX_SIZE = 100;
+	protected static final int MIN_AGE = 100;
+	protected static final int MAX_AGE = 1000;
 
 	public static Plant randomPlant(AppRoot root) {
 		Random rng = new Random();
 		DecimalFormat df = new DecimalFormat("#.#");
 		Plant plant;
 		int tries = 0;
-		
+
 		do {
 			plant = new Plant(rng.nextInt(MAX_MUTATION) + 1, // mutation rate
 					Float.parseFloat(df.format(rng.nextFloat())), // reproduce behaviour
 					Float.parseFloat(df.format(rng.nextFloat())), // grow behaviour
-					(rng.nextInt(10) + 1) * 100, // age cap
+					(rng.nextInt(10) + 1) * MIN_AGE, // age cap
 					rng.nextInt(MAX_SIZE) + 1, // size cap
 					rng.nextInt(MAX_STARTING_SIZE) + 1, // starting size
 					rng.nextInt(MAX_SEED_RANGE) + 1, // seed spreading range
 					root);
 			tries++;
-		} while (plant.isGeneticDeadEnd() && tries  < 100);
+		} while (plant.isGeneticDeadEnd() && tries < 100);
 		return plant;
 	}
 
@@ -87,7 +88,7 @@ public class Plant extends Creature {
 	public float reproduceCost() {
 		float singleCloneCost = GENOME.getGeneValue(GeneType.STARTING_SIZE) * ENERGY_PER_SIZE * CLONE_EFFICIENCY;
 		float singleSpreadCost = (GENOME.getGeneValue(GeneType.STARTING_SIZE) * GENOME.getGeneValue(GeneType.SEED_RANGE)
-				* GENOME.getGeneValue(GeneType.SEED_RANGE) * SEED_EFFICIENCY) / MAX_SEED_RANGE;
+				* SEED_EFFICIENCY) / MAX_SEED_RANGE;
 		return (singleCloneCost + singleSpreadCost);
 	}
 
@@ -96,18 +97,19 @@ public class Plant extends Creature {
 	}
 
 	public float sustainCost() {
-		return size * SUSTAIN_EFFICIENCY * (1 + (GENOME.getGeneValue(GeneType.AGE_CAP) / 1000F));
+		return size * SUSTAIN_EFFICIENCY * (1 + (GENOME.getGeneValue(GeneType.AGE_CAP) / MAX_AGE));
 	}
 
 	public boolean isGeneticDeadEnd() {
 		if (growCost() + sustainCost() >= GENOME.getGeneValue(GeneType.STARTING_SIZE) * ENERGY_PER_SIZE
 				* (1 - GENOME.getGeneValue(GeneType.GROW_BEHAVIOUR))) {
 			return true;
-		}
+		} // Plant will never grow from seeding size
+		
 		if (reproduceCost() + sustainCost() >= GENOME.getGeneValue(GeneType.SIZE_CAP) * ENERGY_PER_SIZE
 				* (1 - GENOME.getGeneValue(GeneType.REPRODUCE_BEHAVIOUR))) {
 			return true;
-		}
+		} // Plant will never reproduce when at mature size
 
 		return false;
 	}

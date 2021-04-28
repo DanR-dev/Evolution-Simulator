@@ -43,7 +43,7 @@ public class Gene implements Cloneable {
 	public void mutate() {
 		Random rng = new Random();
 		
-		value += (rng.nextInt(3) - 1) * INCREMENTS;
+		value += (rng.nextInt(3) - 1) * INCREMENTS; // random one of (-1, 0, or 1)
 		if(value < MIN_VALUE) {
 			value = MIN_VALUE;
 		} else if(value > MAX_VALUE) {

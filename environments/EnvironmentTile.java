@@ -71,7 +71,7 @@ public class EnvironmentTile extends StackPane {
 	}
 
 	public void photosynthesise(float photoEnergy) {
-		Plant[] plants = getPlants();
+		Plant[] plants = getPlants(); // getPlants() returns in descending order of size
 		for (Plant plant : plants) {
 			photoEnergy = plant.photosynthesise(photoEnergy);
 		}

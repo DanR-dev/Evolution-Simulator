@@ -82,14 +82,10 @@ public class Genome implements Cloneable {
 		Random rng = new Random();
 		int nMutations = (int) getGeneValue(GeneType.MUTATION_RATE);
 
-		getGene(GeneType.MUTATION_RATE).mutate();
-
 		while (nMutations > 0) {
 			int randomI = rng.nextInt(genes.size());
-			if (randomI != GeneType.MUTATION_RATE.ordinal()) {
-				genes.get(randomI).mutate();
-				nMutations--;
-			}
+			genes.get(randomI).mutate();
+			nMutations--;
 		}
 	}
 
