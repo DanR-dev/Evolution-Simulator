@@ -24,33 +24,95 @@ import javafx.scene.shape.StrokeType;
  * "size" = volume
  */
 
+/**
+ * Handles common creature data and processes for simulation and graphical
+ * output.
+ * 
+ * @author danpr
+ *
+ */
 public abstract class Creature extends Circle implements Comparable<Creature> {
-	public static final float STARTING_ENERGY = 0.1F;
-	public static final float ENERGY_PER_SIZE = 100;
-	public static final int MAX_MUTATION = 10;
+	public static final float STARTING_ENERGY = 0.1F; // fraction of maximum energy that creatures should start with
+	public static final float ENERGY_PER_SIZE = 100; // maximum energy capacity per size
+	public static final int MAX_MUTATION = 10; // max mutations to occur in an offspring
 	public static final int MAX_SIZE = 100;
 
 	public final Genome GENOME;
-	public final AppRoot ROOT;
+	public final AppRoot ROOT; // reference for program-wide access
 
-	protected Pos posOnTile;
+	protected Pos posOnTile; // creatures position when rendered on a tile (aesthetic only)
 	protected float energy;
 	protected int size;
 	protected int age;
 
-	protected CreatureWindow statWindow = null;
-	protected ProgressBar energyOutput = null;
-	protected ProgressBar sizeOutput = null;
-	protected ProgressBar ageOutput = null;
+	protected CreatureWindow creatureStats = null; // reference for updating of graphical output
+	protected ProgressBar energyOutput = null; // ^
+	protected ProgressBar sizeOutput = null; // ^
+	protected ProgressBar ageOutput = null; // ^
 
 	public abstract Color getCreatureColor();
 
-	public abstract Creature reproduce();
+	public abstract Creature reproduce(); // produce a genetically similar offspring (at appropriate energy cost)
 
-	public abstract boolean survive();
+	public abstract boolean survive(); // check if the creature survives a timestep
 
-	public abstract void chooseBehaviour(Environment environment, EnvironmentTile tile);
+	public abstract void chooseBehaviour(Environment environment, EnvironmentTile tile); // process a single timestep
+																							// for this creature
+																							// possibly including
+																							// creature actions
 
+	/**
+	 * Generate a new creature.
+	 * 
+	 * @param mutationRate       number of mutations to occur during reproduction
+	 * @param reproduceBehaviour proportion of energy to retain during reproduction
+	 * @param growBehaviour      proportion of energy to retain during growth
+	 * @param ageCap             age at which the creature will naturally die
+	 * @param size               initial size of the creature
+	 * @param root               program-wide action reference
+	 */
+	public Creature(int mutationRate, float reproduceBehaviour, float growBehaviour, int ageCap, int size,
+			AppRoot root) {
+		super();
+		this.ROOT = root;
+
+		init(size);
+
+		GENOME = new Genome();
+		GENOME.addGene(GeneType.MUTATION_RATE, new Gene(1, MAX_MUTATION, 1, mutationRate));
+		GENOME.addGene(GeneType.REPRODUCE_BEHAVIOUR, new Gene(0F, 0.9F, 0.1F, reproduceBehaviour));
+		GENOME.addGene(GeneType.GROW_BEHAVIOUR, new Gene(0F, 0.9F, 0.1F, growBehaviour));
+		GENOME.addGene(GeneType.AGE_CAP, new Gene(100F, 1000F, 100F, ageCap));
+	}
+
+	/**
+	 * Generate a genetic clone of the given creature.
+	 * 
+	 * @param genome genome of parent
+	 * @param size   size of clone
+	 * @param root   program-wide action reference
+	 */
+	public Creature(Genome genome, int size, AppRoot root) {
+		super();
+		this.ROOT = root;
+
+		init(size);
+
+		try {
+			this.GENOME = (Genome) genome.clone();
+			this.size = size;
+			this.energy = size * ENERGY_PER_SIZE * STARTING_ENERGY;
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException("creature cloning error");
+		}
+	}
+
+	/**
+	 * generate a graphical item to display creature outputs and local references to
+	 * allow live updating.
+	 * 
+	 * @return VBox containing creature data outputs (energy, size, age)
+	 */
 	public VBox getStatsBox() {
 		VBox box = new VBox();
 		VBox[] stats = new VBox[3];
@@ -76,79 +138,27 @@ public abstract class Creature extends Circle implements Comparable<Creature> {
 
 		return box;
 	}
-	
+
+	/**
+	 * bumper-function for this creature's Genome.
+	 */
 	public float[] getGeneMagnitudes() {
 		return GENOME.getMagnitudes();
 	}
 
-	public void refreshOutput() {
-		if (statWindow == null || !statWindow.isShowing()) {
-			statWindow = null;
-			energyOutput = null;
-			sizeOutput = null;
-			ageOutput = null;
-		} else {
-			energyOutput.setProgress(energy / (size * ENERGY_PER_SIZE));
-			sizeOutput.setProgress(size / GENOME.getGeneValue(GeneType.SIZE_CAP));
-			ageOutput.setProgress(age / GENOME.getGeneValue(GeneType.AGE_CAP));
-		}
-	}
-
-	public Creature(int mutationRate, float reproduceBehaviour, float growBehaviour, int ageCap, int size,
-			AppRoot root) {
-		super();
-		this.ROOT = root;
-
-		init(size);
-
-		GENOME = new Genome();
-		GENOME.addGene(GeneType.MUTATION_RATE, new Gene(1, MAX_MUTATION, 1, mutationRate));
-		GENOME.addGene(GeneType.REPRODUCE_BEHAVIOUR, new Gene(0F, 0.9F, 0.1F, reproduceBehaviour));
-		GENOME.addGene(GeneType.GROW_BEHAVIOUR, new Gene(0F, 0.9F, 0.1F, growBehaviour));
-		GENOME.addGene(GeneType.AGE_CAP, new Gene(100F, 1000F, 100F, ageCap));
-	}
-
-	public Creature(Genome genome, int size, AppRoot root) {
-		super();
-		this.ROOT = root;
-
-		init(size);
-
-		try {
-			this.GENOME = (Genome) genome.clone();
-			this.size = size;
-			this.energy = size * ENERGY_PER_SIZE * STARTING_ENERGY;
-		} catch (CloneNotSupportedException e) {
-			throw new RuntimeException("creature cloning error");
-		}
-	}
-
-	private void init(int size) {
-		Random rng = new Random();
-
-		this.size = size;
-		energy = size * ENERGY_PER_SIZE * STARTING_ENERGY;
-		age = 0;
-		posOnTile = Pos.values()[rng.nextInt(9)]; //first 9 Pos values are in square, last 3 are outside square
-
-		setFill(getCreatureColor());
-		setStrokeWidth(2);
-		setStrokeType(StrokeType.OUTSIDE);
-
-		this.setOnMouseClicked(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				if (statWindow == null || !statWindow.isShowing()) {
-					statWindow = ROOT.creatureWindow(Creature.this);
-				}
-			}
-		});
-	}
-
+	/**
+	 * posOnTile getter.
+	 * 
+	 * @return
+	 */
 	public Pos getPos() {
 		return posOnTile;
 	}
 
+	/**
+	 * compares this creature with another based on size for the Comparable
+	 * interface.
+	 */
 	@Override
 	public int compareTo(Creature creature) {
 		if (size < creature.getSize()) {
@@ -160,14 +170,70 @@ public abstract class Creature extends Circle implements Comparable<Creature> {
 		}
 	}
 
+	/**
+	 * size getter.
+	 * 
+	 * @return
+	 */
 	public int getSize() {
 		return size;
 	}
 
+	/**
+	 * refresh graphical output of creature and creature data (creature size is
+	 * proportional to circle area)
+	 */
 	public void refresh() {
-		this.setRadius(Math.sqrt(size));
-		this.setStroke(Color.BLACK);
+		setRadius(Math.sqrt(size));
 
 		refreshOutput();
+	}
+
+	/**
+	 * update graphical output of creature data (if exists).
+	 */
+	public void refreshOutput() {
+		if (creatureStats == null || !creatureStats.isShowing()) {
+			creatureStats = null;
+			energyOutput = null;
+			sizeOutput = null;
+			ageOutput = null;
+		} else {
+			energyOutput.setProgress(energy / (size * ENERGY_PER_SIZE));
+			sizeOutput.setProgress(size / GENOME.getGeneValue(GeneType.SIZE_CAP));
+			ageOutput.setProgress(age / GENOME.getGeneValue(GeneType.AGE_CAP));
+		}
+	}
+
+	/**
+	 * initialise creature data, graphical appearance, and interactivity.
+	 * 
+	 * @param size
+	 */
+	private void init(int size) {
+		Random rng = new Random();
+
+		this.size = size;
+		energy = size * ENERGY_PER_SIZE * STARTING_ENERGY;
+		age = 0;
+		posOnTile = Pos.values()[rng.nextInt(9)]; // first 9 Pos values are in square, last 3 are outside square
+
+		setFill(getCreatureColor());
+		setStrokeWidth(2);
+		setStrokeType(StrokeType.OUTSIDE);
+		setStroke(Color.BLACK);
+
+		this.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			/**
+			 * on click, open a new CreatureWindow with this creature's data (if not already
+			 * opened)
+			 */
+			@Override
+			public void handle(MouseEvent event) {
+				if (creatureStats == null || !creatureStats.isShowing()) {
+					creatureStats = ROOT.creatureWindow(Creature.this);
+				}
+			}
+		});
 	}
 }

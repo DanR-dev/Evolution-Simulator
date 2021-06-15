@@ -9,8 +9,18 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+/**
+ * display area for statistical charts generated from an environment.
+ * 
+ * @author danpr
+ *
+ */
 public class StatWindow extends Stage {
 
+	/**
+	 * initialise with charts taken from the given environment.
+	 * @param environment
+	 */
 	public StatWindow(Environment environment) {
 		Chart[] basicStats = environment.getBasicCharts();
 		Chart[] advancedStats = environment.getGeneHistograms();
@@ -19,15 +29,15 @@ public class StatWindow extends Stage {
 		HBox advancedStatsBox = new HBox();
 		ScrollPane advancedScroll;
 		Scene scene = new Scene(allStats);
-		
-		for(int i = 0; i < basicStats.length; i++) {
+
+		for (int i = 0; i < basicStats.length; i++) {
 			basicStatsBox.getChildren().add(i, basicStats[i]);
 		}
 
-		for(int i = 0; i < advancedStats.length; i++) {
+		for (int i = 0; i < advancedStats.length; i++) {
 			advancedStatsBox.getChildren().add(i, advancedStats[i]);
 		}
-		
+
 		advancedScroll = new ScrollPane(advancedStatsBox);
 		allStats.getChildren().add(basicStatsBox);
 		allStats.getChildren().add(advancedScroll);

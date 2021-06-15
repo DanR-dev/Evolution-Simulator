@@ -27,48 +27,56 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+/**
+ * handles controls, statistics and simulation of an environment.
+ * 
+ * @author danpr
+ *
+ */
 public class Environment extends VBox {
-	private static final Timer TIMER = new Timer();
+	private static final Timer TIMER = new Timer(); // scheduler for continuous simulation
 
-	private static final float SUNLIGHT = 200;
+	private static final float SUNLIGHT = 200; // energy per tile per time-step available to plants
 
-	private static final int HISTORY_LENGTH = 5000;
-	private static final int CONTROL_SPACING = 10;
-	private static final int MIN_KILL_PERIOD = 1;
-	private static final int MAX_KILL_PERIOD = 10000;
-	private static final int MIN_KILL_RADIUS = 0;
-	private static final int MAX_KILL_RADIUS = 10;
+	private static final int HISTORY_LENGTH = 5000; // number of time-steps to record in statistical data
+	private static final int CONTROL_SPACING = 10; // control components spacing (pixels)
+	private static final int MIN_KILL_PERIOD = 1; // min/max number of time-steps between cullings
+	private static final int MAX_KILL_PERIOD = 10000; // ^
+	private static final int MIN_KILL_RADIUS = 0; // min/max radius of area to cull (clears square 2x+1 tall and 2x+1
+													// wide)
+	private static final int MAX_KILL_RADIUS = 10; // ^
 
-	private static final int FRAME_TIME = 1000;
+	private static final int FRAME_TIME = 1000; // milliseconds between simulation batches when simulating continuously
 
-	private final AppRoot ROOT;
+	private final AppRoot ROOT; // reference for program-wide access
 
-	private BarChart<String, Number> sizeHistogram;
-	private LineChart<Number, Number> biomassGraph;
-	private LineChart<Number, Number> geneGraph;
-	private BarChart<String, Number>[] geneHistograms = new BarChart[GeneType.values().length];
+	private BarChart<String, Number> sizeHistogram; // reference for updating of statistical output
+	private LineChart<Number, Number> biomassGraph; // ^
+	private LineChart<Number, Number> geneGraph; // ^
+	private BarChart<String, Number>[] geneHistograms = new BarChart[GeneType.values().length]; // ^
 
-	private HBox controls;
-	private GridPane simArea;
-	private EnvironmentTile[][] tiles;
+	private HBox controls; // controls bar above environment
+	private GridPane simArea; // display area of the simulation
+	private EnvironmentTile[][] tiles; // graphical and logical grid structure for tiles in the simulation
 
-	private SimTimer simTimer = new SimTimer(this);
-	
-	private CheckBox killPeriodicCheck;
-	private TextField killPeriodInput;
-	private TextField killAreaInput;
+	private SimTimer simTimer = new SimTimer(this); // scheduled trigger for next simulation batch when simulating
+													// continuously
 
-	private int simTime = 0;
-	private int simSpeed = 0;
+	private CheckBox killPeriodicCheck; // input tick-box to enable/disable periodic culling
+	private TextField killPeriodInput; // input for period of cull
+	private TextField killAreaInput; // input for radius of cull
 
+	private int simTime = 0; // current time of the simulation (time-steps)
+	private int simSpeed = 0; // number of time-steps per batch in continuous simulation
+
+	/**
+	 * initialise a single demo plant.
+	 * 
+	 * @param width
+	 * @param height
+	 * @param root   reference for program-wide access
+	 */
 	public Environment(int width, int height, AppRoot root) {
-		super();
-		this.ROOT = root;
-		initGrid(width, height, root);
-		refresh(0);
-	}
-
-	public Environment(int width, int height, int nClusters, int clusterSize, int clusterWidth, AppRoot root) {
 		super();
 
 		controls = new HBox();
@@ -80,11 +88,40 @@ public class Environment extends VBox {
 		this.ROOT = root;
 		initControls();
 		initGrid(width, height, root);
-		initCreatures(nClusters, clusterSize, clusterWidth);
+		initDemo();
+		refresh(0);
+	}
+
+	/**
+	 * initialise an environment with a randomly generated population of plants.
+	 * 
+	 * @param width
+	 * @param height
+	 * @param nClusters     number of clusters of plants
+	 * @param clusterSize   number of plants per cluster
+	 * @param clusterRadius radius of each cluster
+	 * @param root          reference for program-wide access
+	 */
+	public Environment(int width, int height, int nClusters, int clusterSize, int clusterRadius, AppRoot root) {
+		super();
+
+		controls = new HBox();
+		simArea = new GridPane();
+
+		this.getChildren().add(controls);
+		this.getChildren().add(simArea);
+
+		this.ROOT = root;
+		initControls();
+		initGrid(width, height, root);
+		initCreatures(nClusters, clusterSize, clusterRadius);
 
 		refresh(0);
 	}
 
+	/**
+	 * initialise the controls bar and actions of each input.
+	 */
 	private void initControls() {
 		HBox stepControls = new HBox();
 		Button step1 = new Button();
@@ -204,8 +241,8 @@ public class Environment extends VBox {
 		killAll.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				for(int i = 0; i < Environment.this.tiles.length; i++) {
-					for(int j = 0; j < Environment.this.tiles[0].length; j++) {
+				for (int i = 0; i < Environment.this.tiles.length; i++) {
+					for (int j = 0; j < Environment.this.tiles[0].length; j++) {
 						Environment.this.tiles[i][j].killCreatures();
 					}
 				}
@@ -217,15 +254,16 @@ public class Environment extends VBox {
 		seedLife.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				Environment.this.initCreatures(1, 1, 1);;
+				Environment.this.initCreatures(1, 1, 1);
+				;
 				Environment.this.refresh(0);
 			}
 		});
-		
+
 		killPeriodicCheck.setText("Periodic Cull");
 		killPeriodLabel.setText("Cull Period");
 		killAreaLabel.setText("Cull Radius");
-		
+
 		killPeriodBox.getChildren().add(killPeriodLabel);
 		killPeriodBox.getChildren().add(killPeriodInput);
 		killPeriodBox.setAlignment(Pos.CENTER);
@@ -253,6 +291,13 @@ public class Environment extends VBox {
 		controls.setSpacing(CONTROL_SPACING);
 	}
 
+	/**
+	 * initialise the tile grid structure.
+	 * 
+	 * @param width
+	 * @param height
+	 * @param root   reference for program-wide access
+	 */
 	private void initGrid(int width, int height, AppRoot root) {
 		tiles = new EnvironmentTile[width][height];
 		for (int i = 0; i < width; i++) {
@@ -264,7 +309,14 @@ public class Environment extends VBox {
 		simArea.setGridLinesVisible(true);
 	}
 
-	private void initCreatures(int nClusters, int clusterSize, int clusterWidth) {
+	/**
+	 * generate and place random plants in the environment.
+	 * 
+	 * @param nClusters     number of clusters of plants
+	 * @param clusterSize   number of plants per cluster
+	 * @param clusterRadius radius of each cluster
+	 */
+	private void initCreatures(int nClusters, int clusterSize, int clusterRadius) {
 		Random rng = new Random();
 		int clusterX;
 		int clusterY;
@@ -276,10 +328,28 @@ public class Environment extends VBox {
 			for (int j = 0; j < clusterSize; j++) {
 				clusterCreatures[j] = Plant.randomPlant(ROOT);
 			}
-			scatterAll(tiles[clusterX][clusterY], clusterWidth, clusterCreatures);
+			scatterAll(tiles[clusterX][clusterY], clusterRadius, clusterCreatures);
 		}
 	}
 
+	/**
+	 * randomly place a single plant with predetermined genes.
+	 */
+	private void initDemo() {
+		Random rng = new Random();
+		int posX;
+		int posY;
+
+		posX = rng.nextInt(tiles.length);
+		posY = rng.nextInt(tiles[0].length);
+		scatter(tiles[posX][posY], 0, Plant.demoPlant(ROOT));
+	}
+
+	/**
+	 * generate a size histogram for the population of this environment.
+	 * 
+	 * @return
+	 */
 	private Chart sizeHistogram() {
 		CategoryAxis xAxis = new CategoryAxis();
 		NumberAxis yAxis = new NumberAxis();
@@ -296,6 +366,10 @@ public class Environment extends VBox {
 		return sizeHistogram;
 	}
 
+	/**
+	 * update the size histogram (if exists) with the current state of the
+	 * simulation.
+	 */
 	private void refreshSizeHistogram() {
 		if (sizeHistogram != null) {
 			Series<String, Number> series;
@@ -319,6 +393,11 @@ public class Environment extends VBox {
 		}
 	}
 
+	/**
+	 * generate a biomass over time graph for the population of this environment.
+	 * 
+	 * @return
+	 */
 	private Chart biomassGraph() {
 		NumberAxis xAxis = new NumberAxis();
 		NumberAxis yAxis = new NumberAxis();
@@ -335,6 +414,10 @@ public class Environment extends VBox {
 		return biomassGraph;
 	}
 
+	/**
+	 * update the biomass graph (if exists) with the current state of the
+	 * simulation.
+	 */
 	private void refreshBiomassGraph(int step) {
 		if (biomassGraph != null && getCreatures().length != 0) {
 			Series<Number, Number> series = biomassGraph.getData().get(0);
@@ -360,6 +443,11 @@ public class Environment extends VBox {
 		}
 	}
 
+	/**
+	 * generate a gene value over time graph for the population of this environment.
+	 * 
+	 * @return
+	 */
 	private Chart geneGraph() {
 		NumberAxis xAxis = new NumberAxis();
 		NumberAxis yAxis = new NumberAxis();
@@ -380,6 +468,9 @@ public class Environment extends VBox {
 		return geneGraph;
 	}
 
+	/**
+	 * update the gene graph (if exists) with the current state of the simulation.
+	 */
 	private void refreshGeneGraph(int step) {
 		if (geneGraph != null && getCreatures().length != 0) {
 			Creature[] creatures = getCreatures();
@@ -417,6 +508,12 @@ public class Environment extends VBox {
 		}
 	}
 
+	/**
+	 * generate a gene value histogram for each gene for the population of this
+	 * environment.
+	 * 
+	 * @return
+	 */
 	private Chart[] geneHistograms() {
 		CategoryAxis xAxis[] = new CategoryAxis[GeneType.values().length];
 		NumberAxis yAxis[] = new NumberAxis[GeneType.values().length];
@@ -440,6 +537,10 @@ public class Environment extends VBox {
 		return geneHistograms;
 	}
 
+	/**
+	 * update the gene histograms (if exists) with the current state of the
+	 * simulation.
+	 */
 	private void refreshGeneHistograms() {
 		Creature[] creatures = getCreatures();
 
@@ -466,6 +567,11 @@ public class Environment extends VBox {
 		}
 	}
 
+	/**
+	 * collect the size histogram, biomass graph, and gene graphs into an array.
+	 * 
+	 * @return
+	 */
 	public Chart[] getBasicCharts() {
 		Chart[] charts = new Chart[3];
 
@@ -476,10 +582,20 @@ public class Environment extends VBox {
 		return charts;
 	}
 
+	/**
+	 * collect the gene value histograms into an array.
+	 * 
+	 * @return
+	 */
 	public Chart[] getGeneHistograms() {
 		return geneHistograms();
 	}
 
+	/**
+	 * get a reference to every creature in the environment.
+	 * 
+	 * @return
+	 */
 	public Creature[] getCreatures() {
 		ArrayList<Creature> creatures = new ArrayList<Creature>();
 
@@ -494,7 +610,14 @@ public class Environment extends VBox {
 		return creatures.toArray(new Creature[0]);
 	}
 
-	public EnvironmentTile getTile(int x, int y) { // wraps
+	/**
+	 * get the tile at the specified grid reference, wrapping in both dimensions.
+	 * 
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public EnvironmentTile getTile(int x, int y) {
 		int trueX;
 		int trueY;
 
@@ -502,7 +625,7 @@ public class Environment extends VBox {
 			trueX = x % tiles.length;
 		} else {
 			trueX = x % tiles.length;
-			if(trueX < 0) {
+			if (trueX < 0) {
 				trueX += tiles.length;
 			}
 		}
@@ -510,7 +633,7 @@ public class Environment extends VBox {
 			trueY = y % tiles[0].length;
 		} else {
 			trueY = y % tiles[0].length;
-			if(trueY < 0) {
+			if (trueY < 0) {
 				trueY += tiles[0].length;
 			}
 		}
@@ -518,6 +641,12 @@ public class Environment extends VBox {
 		return tiles[trueX][trueY];
 	}
 
+	/**
+	 * cull all plants in a number of randomly selected areas of the environment.
+	 * 
+	 * @param nClusters     number of areas to cull
+	 * @param clusterRadius radius of each area.
+	 */
 	public void killRandomAreas(int nClusters, int clusterRadius) {
 		Random rng = new Random();
 		int clusterX;
@@ -533,48 +662,71 @@ public class Environment extends VBox {
 		}
 	}
 
+	/**
+	 * scatter a number of creature over an area.
+	 * 
+	 * @param tile      tile at centre of area
+	 * @param dist      maximum distance from that tile to scatter to
+	 * @param creatures creatures to be scattered
+	 */
 	public void scatterAll(EnvironmentTile tile, int dist, Creature[] creatures) {
 		for (Creature creature : creatures) {
 			scatter(tile, dist, creature);
 		}
 	}
 
+	/**
+	 * place a single creature randomly within the given area
+	 * 
+	 * @param tile     tile tile at centre of area
+	 * @param dist     maximum distance from that tile to place creature
+	 * @param creature
+	 */
 	public void scatter(EnvironmentTile tile, int dist, Creature creature) {
 		Random rng = new Random();
 
 		getTile(tile.getX() + rng.nextInt(dist * 2 + 1) - dist, tile.getY() + rng.nextInt(dist * 2 + 1) - dist)
 				.addCreature(creature);
 	}
-	
+
+	/**
+	 * read the input for cull period and cull area and move it within the min/max
+	 * values if necessary.
+	 */
 	public void correctInput() {
 		int periodInput;
 		int areaInput;
-		
+
 		try {
 			periodInput = Integer.parseInt(killPeriodInput.getText());
 			areaInput = Integer.parseInt(killAreaInput.getText());
 
-			if(periodInput < MIN_KILL_PERIOD) {
+			if (periodInput < MIN_KILL_PERIOD) {
 				periodInput = MIN_KILL_PERIOD;
 			}
-			if(periodInput > MAX_KILL_PERIOD) {
+			if (periodInput > MAX_KILL_PERIOD) {
 				periodInput = MAX_KILL_PERIOD;
 			}
-			if(areaInput < MIN_KILL_RADIUS) {
+			if (areaInput < MIN_KILL_RADIUS) {
 				areaInput = MIN_KILL_RADIUS;
 			}
-			if(areaInput > MAX_KILL_RADIUS) {
+			if (areaInput > MAX_KILL_RADIUS) {
 				areaInput = MAX_KILL_RADIUS;
 			}
-		}catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			periodInput = MIN_KILL_PERIOD;
 			areaInput = MIN_KILL_RADIUS;
 		}
-		
+
 		killPeriodInput.setText("" + periodInput);
 		killAreaInput.setText("" + areaInput);
 	}
 
+	/**
+	 * simulate a single batch of time-steps for the whole environment.
+	 * 
+	 * @param step number of time-steps in batch
+	 */
 	public void simulateSingle(int step) {
 		correctInput();
 		for (int i = 0; i < step; i++) {
@@ -594,10 +746,14 @@ public class Environment extends VBox {
 				}
 			}
 		}
-		
+
 		refresh(step);
 	}
 
+	/**
+	 * simulate a single batch of time-steps and schedule a recursion after a period
+	 * of time.
+	 */
 	public void simulateContinuous() {
 		if (simSpeed > 0) {
 			Platform.runLater(() -> simulateSingle(simSpeed));
@@ -606,6 +762,11 @@ public class Environment extends VBox {
 		}
 	}
 
+	/**
+	 * refresh the graphical appearance of the environment and statistical output.
+	 * 
+	 * @param step number of steps that have passed since last refresh
+	 */
 	public void refresh(int step) {
 		for (int i = 0; i < tiles.length; i++) {
 			for (int j = 0; j < tiles[0].length; j++) {
@@ -615,21 +776,10 @@ public class Environment extends VBox {
 
 		refreshSizeHistogram();
 		refreshGeneHistograms();
-		
-		if(step != 0) {
+
+		if (step != 0) {
 			refreshBiomassGraph(step);
 			refreshGeneGraph(step);
 		}
 	}
-
-	/**
-	 * public static void main(String[] args) { Environment environment = new
-	 * Environment(10, 5); Plant[] testPlants = new Plant[10];
-	 * 
-	 * System.out.println();
-	 * 
-	 * for (int i = 0; i < 10; i++) { testPlants[i] = Plant.randomPlant(); }
-	 * 
-	 * environment.timeStep(); }
-	 */
 }

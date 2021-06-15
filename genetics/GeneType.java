@@ -1,5 +1,10 @@
 package genetics;
 
+/**
+ * handles the designation of genes to describe different traits.
+ * @author danpr
+ *
+ */
 public enum GeneType {
 	// creature genes, required
 	MUTATION_RATE,
@@ -14,6 +19,10 @@ public enum GeneType {
 	// plant genes, required
 	SEED_RANGE;
 
+	/**
+	 * translates this gene designation to a user readable name.
+	 * @return
+	 */
 	public String alias() {
 		switch (this) {
 		case MUTATION_RATE:
@@ -27,7 +36,7 @@ public enum GeneType {
 		case SIZE_CAP:
 			return "Max Size";
 		case STARTING_SIZE:
-			return "Seed Size";
+			return "Offspring Size";
 		case SEED_RANGE:
 			return "Seeding Distance";
 		default:
